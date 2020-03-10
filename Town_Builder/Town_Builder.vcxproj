@@ -77,6 +77,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <LibraryPath>%OGRE_HOME%\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>%ProjectDir%\source;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -111,7 +112,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>%OGRE_HOME%\include\OGRE\OIS;%OGRE_HOME%\include\OGRE\RTShaderSystem;%OGRE_HOME%\include\OGRE\Overlay;%OGRE_HOME%\include\OGRE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Dokumente\Visual Studio 2017\Projects\Town_Builder\Town_Builder\source;%OGRE_HOME%\include\OGRE\OIS;%OGRE_HOME%\include\OGRE\RTShaderSystem;%OGRE_HOME%\include\OGRE\Overlay;%OGRE_HOME%\include\OGRE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -149,7 +150,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>D:\Development\Ogre3D\include\OGRE\OIS;D:\Development\Ogre3D\include\OGRE\RTShaderSystem;D:\Development\Ogre3D\include\OGRE\Overlay;D:\Development\Ogre3D\include\OGRE;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%OGRE_HOME%\include\OGRE\OIS;%OGRE_HOME%\include\OGRE\RTShaderSystem;%OGRE_HOME%\include\OGRE\Overlay;%OGRE_HOME%\include\OGRE;D:\Dokumente\Visual Studio 2017\Projects\Town_Builder\Town_Builder\source;%ProjectDir%\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -165,6 +166,18 @@
     <ClInclude Include="source\Helpers.h" />
     <ClInclude Include="source\InputManager.h" />
     <ClInclude Include="source\ModelPlacer.h" />
+    <ClInclude Include="source\PagedGeometry\BatchedGeometry.h" />
+    <ClInclude Include="source\PagedGeometry\BatchPage.h" />
+    <ClInclude Include="source\PagedGeometry\GrassLoader.h" />
+    <ClInclude Include="source\PagedGeometry\ImpostorPage.h" />
+    <ClInclude Include="source\PagedGeometry\PagedGeometry.h" />
+    <ClInclude Include="source\PagedGeometry\PropertyMaps.h" />
+    <ClInclude Include="source\PagedGeometry\RandomTable.h" />
+    <ClInclude Include="source\PagedGeometry\StaticBillboardSet.h" />
+    <ClInclude Include="source\PagedGeometry\TreeLoader2D.h" />
+    <ClInclude Include="source\PagedGeometry\TreeLoader3D.h" />
+    <ClInclude Include="source\PagedGeometry\WindBatchedGeometry.h" />
+    <ClInclude Include="source\PagedGeometry\WindBatchPage.h" />
     <ClInclude Include="source\pch.h" />
     <ClInclude Include="source\PlantPlacer.h" />
     <ClInclude Include="source\SimplexNoise.h" />
@@ -175,12 +188,24 @@
     <ClCompile Include="source\Game.cpp" />
     <ClCompile Include="source\InputManager.cpp" />
     <ClCompile Include="source\ModelPlacer.cpp" />
+    <ClCompile Include="source\PagedGeometry\BatchedGeometry.cpp" />
+    <ClCompile Include="source\PagedGeometry\BatchPage.cpp" />
+    <ClCompile Include="source\PagedGeometry\GrassLoader.cpp" />
+    <ClCompile Include="source\PagedGeometry\ImpostorPage.cpp" />
+    <ClCompile Include="source\PagedGeometry\PagedGeometry.cpp" />
+    <ClCompile Include="source\PagedGeometry\PropertyMaps.cpp" />
+    <ClCompile Include="source\PagedGeometry\StaticBillboardSet.cpp" />
+    <ClCompile Include="source\PagedGeometry\TreeLoader2D.cpp" />
+    <ClCompile Include="source\PagedGeometry\TreeLoader3D.cpp" />
+    <ClCompile Include="source\PagedGeometry\WindBatchedGeometry.cpp" />
+    <ClCompile Include="source\PagedGeometry\WindBatchPage.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="source\PlantPlacer.cpp" />
     <ClCompile Include="source\SimplexNoise.cpp" />
     <ClCompile Include="source\Terrain.cpp" />
     <ClCompile Include="source\Town_Builder.cpp" />

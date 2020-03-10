@@ -9,6 +9,7 @@
 #include "Terrain.h"
 #include "Bites/OgreTrays.h"
 #include "ModelPlacer.h"
+#include "PlantPlacer.h"
 
 using namespace Ogre;
 
@@ -77,6 +78,7 @@ private:
 
 	CTerrain* mTerrain;
 	CModelPlacer* mModelPlacer;
+	CPlantPlacer* mPlantPlacer;
 };
 
 

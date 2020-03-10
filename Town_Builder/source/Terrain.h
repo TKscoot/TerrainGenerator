@@ -36,7 +36,6 @@ public:
 	// Getter & Setter
 	TerrainGroup* getTerrainGroup() { return mTerrainGroup; }
 
-
 private:
 	// Methods
 	void ConfigureTerrainDefaults(Light* l);

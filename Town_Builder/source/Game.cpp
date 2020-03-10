@@ -46,10 +46,12 @@ void CGame::Setup()
 
 
 	// Add our model to our resources and index it
+	ResourceGroupManager::getSingleton().addResourceLocation("media/packs/trees.zip", "Zip");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/packs/Sinbad.zip", "Zip");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/packs/trays.zip", "Zip");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/models/", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures", "FileSystem");
+	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/scripts", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures/nvidia", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/skyboxes/sunnytropic", "FileSystem");
 	ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
@@ -98,6 +100,9 @@ void CGame::Setup()
 
 	mModelPlacer = new CModelPlacer(sceneManager, mTerrain);
 
+	mPlantPlacer = new CPlantPlacer(sceneManager, mTerrain);
+	mPlantPlacer->Initialize();
+
 }
 
 void CGame::Update()
@@ -107,6 +112,7 @@ void CGame::Update()
 
 	mTerrain->Update();
 	mModelPlacer->Update();
+	mPlantPlacer->Update();
 
 	//std::cout << mCamera->getManager()->getTarget()->getOrientation() << mCamera->getManager()->getTarget()->getLocalAxes() << std::endl;
 	mWindow->update();
