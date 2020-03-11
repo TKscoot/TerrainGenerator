@@ -140,5 +140,8 @@
     <ClInclude Include="source\PagedGeometry\WindBatchPage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\HeightFunction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

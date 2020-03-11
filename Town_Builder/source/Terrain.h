@@ -34,7 +34,15 @@ public:
 	void InjectKeyUp(const OIS::KeyEvent& evt);
 
 	// Getter & Setter
-	TerrainGroup* getTerrainGroup() { return mTerrainGroup; }
+	TerrainGroup* getTerrainGroup() 
+	{ 
+		return mTerrainGroup; 
+	}
+
+	TexturePtr getColorMap() 
+	{ 
+		return mTerrain->getGlobalColourMap(); 
+	}
 
 private:
 	// Methods

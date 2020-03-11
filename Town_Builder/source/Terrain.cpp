@@ -98,7 +98,7 @@ void CTerrain::DefineTerrain(long x, long y, float value)
 	float* heightMap = OGRE_ALLOC_T(float, terrainSize*terrainSize, MEMCATEGORY_GEOMETRY);
 
 	Vector2 worldOffset(Real(x*(terrainSize - 1)), Real(y*(terrainSize - 1)));
-	worldOffset += Vector2(0);//mOriginPoint;
+	worldOffset += mOriginPoint;
 
 
 
@@ -127,7 +127,9 @@ void CTerrain::DefineTerrain(long x, long y, float value)
 				mFrequency = mFrequency * 2.0f;
 			}
 
-			heightMap[i*terrainSize + j] = std::pow(e, 2.0);
+			e = std::pow(e, 2.0);
+
+			heightMap[i*terrainSize + j] = e;
 		}
 	}
 
@@ -166,15 +168,11 @@ void CTerrain::InitBlendMaps(Terrain* terrain)
 		{
 			Real tx, ty;
 
-			float offset0 = Helpers::RandomFloat(-2.5f, 30.8f);
-			float offset1 = Helpers::RandomFloat(190.0f, 210.0f);
-
-
 			blendMap0->convertImageToTerrainSpace(x, y, &tx, &ty);
 			float height = terrain->getHeightAtTerrainPosition(tx, ty);
 
-			*pBlend0++ = Math::saturate((height - (minHeight0 /*+ offset0*/)) / fadeDist0);
-			*pBlend1++ = Math::saturate((height - minHeight1 + offset0) / fadeDist1);
+			*pBlend0++ = Math::saturate((height - minHeight0) / fadeDist0);
+			*pBlend1++ = Math::saturate((height - minHeight1) / fadeDist1);
 		}
 	}
 
@@ -247,5 +245,4 @@ void CTerrain::InjectKeyDown(const OIS::KeyEvent & evt)
 void CTerrain::InjectKeyUp(const OIS::KeyEvent & evt)
 {
 	if (evt.key == OIS::KC_T) mKeyPressed = false;
-
 }

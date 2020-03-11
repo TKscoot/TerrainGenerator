@@ -163,6 +163,7 @@
   <ItemGroup>
     <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\Game.h" />
+    <ClInclude Include="source\HeightFunction.h" />
     <ClInclude Include="source\Helpers.h" />
     <ClInclude Include="source\InputManager.h" />
     <ClInclude Include="source\ModelPlacer.h" />

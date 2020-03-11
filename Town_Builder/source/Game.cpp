@@ -89,7 +89,7 @@ void CGame::Setup()
 	entNode->scale(Vector3(20, 20, 20));
 	entNode->showBoundingBox(true);
 
-
+	
 	// Create an instance of the MyFrameListener Class and add it to the root object
 	MyFrameListener* myListener = new MyFrameListener();
 	myListener->setCam(mCamera);
