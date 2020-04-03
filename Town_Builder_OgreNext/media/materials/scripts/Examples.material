@@ -177,6 +177,24 @@ material Examples/CloudyNoonSkyBox
 	}
 }
 
+material Examples/SunnyTropicSkyBox
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			depth_write off
+
+			texture_unit
+			{
+				texture TropicalSunnyDay.jpg cubic
+				tex_address_mode clamp
+			}
+		}
+	}
+}
+
 material Examples/StormySkyBox
 {
 	technique
