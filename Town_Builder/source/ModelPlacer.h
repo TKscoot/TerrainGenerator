@@ -15,12 +15,9 @@ public:
 		id++;
 		std::stringstream ss;
 		ss << id;
-		std::string s = ss.str();
 
-
-
-		mEntity = mSceneManager->createEntity("Sinbad.mesh");
-		mEntNode = mSceneManager->getRootSceneNode()->createChildSceneNode(s);
+		mEntity = mSceneManager->createEntity("house.mesh");
+		mEntNode = mSceneManager->getRootSceneNode()->createChildSceneNode(ss.str());
 		mEntNode->attachObject(mEntity);
 		mEntNode->_update(true, false);
 		mEntNode->scale(Vector3(10, 10, 10));
@@ -28,7 +25,8 @@ public:
 
 	void Update();
 	void PlaceObject();
-	void TintObject(float r, float g, float b, float a);
+	void TintObject(Entity* ent, float r, float g, float b, float a);
+	void CloneAndApplyMaterial(Entity* ent);
 
 	float CalculateHeightDelta(Vector3 position);
 
@@ -37,6 +35,7 @@ public:
 
 
 private:
+	enum TintState{FULL, GREEN, RED};
 
 	SceneManager* mSceneManager = nullptr;
 	CTerrain* mTerrain = nullptr;
@@ -45,7 +44,8 @@ private:
 	Entity* mEntity;
 	SceneNode* mEntNode;
 	bool mAttachToMouse = false;
+	TintState mTintState = FULL;
 	MaterialPtr mMatPtr;
 
-
+	std::vector<SceneNode*> mPlacedObjects;
 };

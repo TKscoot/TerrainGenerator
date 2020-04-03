@@ -3,6 +3,8 @@
 #include <iostream>
 #include "Ogre.h"
 #include "OgreFrameListener.h"
+#include "Bites/OgreApplicationContext.h"
+#include "OgreConfigDialog.h"
 #include "Bites/OgreInput.h"
 #include "InputManager.h"
 #include "Camera.h"
@@ -10,10 +12,11 @@
 #include "Bites/OgreTrays.h"
 #include "ModelPlacer.h"
 #include "PlantPlacer.h"
+#include "ImguiManager.h"
 
 using namespace Ogre;
 
-class CGame : public OIS::KeyListener, OIS::MouseListener
+class CGame : public OIS::KeyListener, public OIS::MouseListener, public OgreBites::ApplicationContext 
 {
 public:
 	CGame();
@@ -79,6 +82,7 @@ private:
 	CTerrain* mTerrain;
 	CModelPlacer* mModelPlacer;
 	CPlantPlacer* mPlantPlacer;
+
 };
 
 
@@ -90,9 +94,11 @@ public:
 	bool frameRenderingQueued(const FrameEvent &evt);
 	void setCam(CCamera* cam) { mCam = cam; }
 	void setRoot(Root* root) { mRoot = root; }
-
-	CCamera* mCam;
-	Root* mRoot;
+	void setWindow(RenderWindow* window) { mWindow = window; }
+	
+	CCamera*	  mCam;
+	Root*		  mRoot;
+	RenderWindow* mWindow;
 
 };
 

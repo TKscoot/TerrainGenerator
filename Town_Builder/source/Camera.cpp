@@ -79,7 +79,7 @@ bool CCamera::FrameRenderingQueued(const Ogre::FrameEvent& evt)
 	if (mGoingDown) accel	 -= up;
 
 	// if accelerating, try to reach top speed in a certain time
-	Ogre::Real topSpeed = mFastMove ? mTopSpeed * 20 : mTopSpeed;
+	Ogre::Real topSpeed = mFastMove ? mTopSpeed * 10 : mTopSpeed;
 	if (accel.squaredLength() != 0)
 	{
 		accel.normalise();

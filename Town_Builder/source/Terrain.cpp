@@ -226,7 +226,7 @@ void CTerrain::FlattenTerrainUnderObject(SceneNode * sn)
 			Vector3 pos = Vector3(
 				flattenDataArray[0].terrainPosition.x + a, //- (offset1) + (halfSize.x * 0.5f), 
 				flattenDataArray[0].terrainPosition.y + b, //- (offset2) + (halfSize.y * 0.5f), 
-				flattenDataArray[0].corner.y + 5.0f);
+				flattenDataArray[0].corner.y/* + 5.0f*/);
 
 			mTerrain->setHeightAtPoint(pos.x, pos.y, pos.z);
 

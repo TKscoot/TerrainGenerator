@@ -117,7 +117,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OgreBites.lib;OgreMain.lib;OgreOverlay.lib;OgreRTShaderSystem.lib;OIS.lib;OgreTerrain.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OgreImgui.lib;OgreBites.lib;OgreMain.lib;OgreOverlay.lib;OgreRTShaderSystem.lib;OIS_d.lib;OgreTerrain.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -150,23 +150,32 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>%OGRE_HOME%\include\OGRE\OIS;%OGRE_HOME%\include\OGRE\RTShaderSystem;%OGRE_HOME%\include\OGRE\Overlay;%OGRE_HOME%\include\OGRE;D:\Dokumente\Visual Studio 2017\Projects\Town_Builder\Town_Builder\source;%ProjectDir%\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\deps\imgui;%OGRE_HOME%\include\OGRE\OIS;%OGRE_HOME%\include\OGRE\RTShaderSystem;%OGRE_HOME%\include\OGRE\Overlay;%OGRE_HOME%\include\OGRE;$(ProjectDir)\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OgreBites.lib;OgreMain.lib;OgreOverlay.lib;OgreRTShaderSystem.lib;OIS.lib;OgreTerrain.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OgreImgui.lib;OgreBites.lib;OgreMain.lib;OgreOverlay.lib;OgreRTShaderSystem.lib;OIS.lib;OgreTerrain.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="deps\imgui\imconfig.h" />
+    <ClInclude Include="deps\imgui\imgui.h" />
+    <ClInclude Include="deps\imgui\ImguiManager.h" />
+    <ClInclude Include="deps\imgui\imgui_internal.h" />
+    <ClInclude Include="deps\imgui\imstb_rectpack.h" />
+    <ClInclude Include="deps\imgui\imstb_textedit.h" />
+    <ClInclude Include="deps\imgui\imstb_truetype.h" />
+    <ClInclude Include="deps\misc\freetype\imgui_freetype.h" />
     <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\Game.h" />
     <ClInclude Include="source\HeightFunction.h" />
     <ClInclude Include="source\Helpers.h" />
     <ClInclude Include="source\InputManager.h" />
     <ClInclude Include="source\ModelPlacer.h" />
+    <ClInclude Include="source\OgreStableHeaders.h" />
     <ClInclude Include="source\PagedGeometry\BatchedGeometry.h" />
     <ClInclude Include="source\PagedGeometry\BatchPage.h" />
     <ClInclude Include="source\PagedGeometry\GrassLoader.h" />
@@ -185,6 +194,13 @@
     <ClInclude Include="source\Terrain.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="deps\imgui\imgui.cpp" />
+    <ClCompile Include="deps\imgui\ImguiManager.cpp" />
+    <ClCompile Include="deps\imgui\imgui_demo.cpp" />
+    <ClCompile Include="deps\imgui\imgui_draw.cpp" />
+    <ClCompile Include="deps\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="deps\misc\fonts\binary_to_compressed_c.cpp" />
+    <ClCompile Include="deps\misc\freetype\imgui_freetype.cpp" />
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Game.cpp" />
     <ClCompile Include="source\InputManager.cpp" />
@@ -210,6 +226,9 @@
     <ClCompile Include="source\SimplexNoise.cpp" />
     <ClCompile Include="source\Terrain.cpp" />
     <ClCompile Include="source\Town_Builder.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="deps\misc\natvis\imgui.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
