@@ -231,12 +231,12 @@ void CTerrain::FlattenTerrainUnderObject(SceneNode * sn)
 
 bool CTerrain::frameStarted(const FrameEvent & evt)
 {
-	ImGui::Begin("Terrain");
-	if(ImGui::Button("Generate!"))
-	{
-		CreateTerrain();
-	}
-	ImGui::End();
+	//ImGui::Begin("Terrain");
+	//if(ImGui::Button("Generate!"))
+	//{
+	//	CreateTerrain();
+	//}
+	//ImGui::End();
 
 	return true;
 }
