@@ -10,24 +10,30 @@ void CPlantPlacer::Initialize()
 	//PlaceGrass();
 }
 
+void CPlantPlacer::Update()
+{
+	//mTreesPG->update();
+	//mGrassPG->update();
+}
+
 void CPlantPlacer::PlaceTrees()
 {
-	mTreesPG->setCamera(mSceneManager->getCamera("Camera"));
+	mEntity = mSceneManager->createEntity("Tree", "tree2.mesh");
 
-	mTreesPG->setPageSize(150);
-	mTreesPG->setInfinite();
-
-	mTreesPG->addDetailLevel<BatchPage>(4000, 30);
-	mTreesPG->addDetailLevel<ImpostorPage>(8000, 50);
-
+	//mTreesPG->setCamera(mSceneManager->getCamera("Camera"));
+	//
+	//mTreesPG->setPageSize(150);
+	//mTreesPG->setInfinite();
+	//
+	//mTreesPG->addDetailLevel<BatchPage>(150, 30, Ogre::Any(0));
+	//mTreesPG->addDetailLevel<ImpostorPage>(500, 0, Ogre::Any(0));
+	//
 	AxisAlignedBox terrainAABB = mTerrain->getTerrainGroup()->getTerrain(0, 0)->getWorldAABB();
 	TBounds bounds = mTreesPG->convertAABToTBounds(terrainAABB);
-
-	mTreeLoader = new TreeLoader3D(mTreesPG, bounds);
-	mTreesPG->setPageLoader(mTreeLoader);
-	mTreeLoader->setMaximumScale(10);
-
-	mEntity = mSceneManager->createEntity("Tree", "tree.mesh");
+	//
+	//mTreeLoader = new TreeLoader3D(mTreesPG, bounds);
+	//mTreesPG->setPageLoader(mTreeLoader);
+	//mTreeLoader->setMaximumScale(10);
 
 	HeightFunction::initialize(mTerrain->getTerrainGroup());
 
@@ -55,7 +61,18 @@ void CPlantPlacer::PlaceTrees()
 					scale = Math::RangeRandom(5, 10.0f);
 					//scale = 10.0f;
 
-					mTreeLoader->addTree(mEntity, position, yaw, scale);
+					Ogre::stringstream ss;
+					ss << x;
+					ss << z;
+					Entity* ent = mSceneManager->createEntity("tree2.mesh");
+					SceneNode* entNode = mSceneManager->createSceneNode("tree" + ss.str());
+					entNode->attachObject(ent);
+					mSceneManager->getRootSceneNode()->addChild(entNode);
+					entNode->setPosition(position);
+					entNode->scale(Vector3(scale, scale, scale));
+					entNode->yaw(yaw);
+
+					//mTreeLoader->addTree(mEntity, position, yaw, scale);
 				}
 
 			}
@@ -147,11 +164,7 @@ void CPlantPlacer::PlaceGrass()
 	layer->setMaxSlope(Degree(5.0f).valueRadians());
 }
 
-void CPlantPlacer::Update()
-{
-	//mTreesPG->update();
-	//mGrassPG->update();
-}
+
 
 void CPlantPlacer::CreateGrassMesh()
 {

@@ -24,10 +24,12 @@ void CGame::Setup()
 	// Create a new scene manager.
 	SceneManager* sceneManager = mRoot->createSceneManager();
 	sceneManager->setAmbientLight(Ogre::ColourValue(0.0, 0.0, 0.0));
+	std::cout << sceneManager->getName();
 
 	//Create ShaderGenerator instance
 	RTShader::ShaderGenerator* shadergen = RTShader::ShaderGenerator::getSingletonPtr();
 	shadergen->addSceneManager(sceneManager);
+	RTShader::ShaderGenerator::getSingleton().initialize();
 
 	// Gui listener
 	sceneManager->addRenderQueueListener(getOverlaySystem());
@@ -47,7 +49,7 @@ void CGame::Setup()
 
 
 	// Add resources and load/initialise them
-	ResourceGroupManager::getSingleton().addResourceLocation("media/packs/trees.zip", "Zip");
+	//ResourceGroupManager::getSingleton().addResourceLocation("media/packs/trees.zip", "Zip");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/packs/Sinbad.zip", "Zip");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/models/", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/ShadowVolume/", "FileSystem");
@@ -60,6 +62,11 @@ void CGame::Setup()
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures/nvidia", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/skyboxes/sunnytropic", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/imgui/resources", "FileSystem", Ogre::ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME);
+	//ResourceGroupManager::getSingleton().addResourceLocation("D:/Development/ogre-pagedgeometry/ogre-pagedgeometry-master/resources/media/grass", "FileSystem");
+	//ResourceGroupManager::getSingleton().addResourceLocation("D:/Development/ogre-pagedgeometry/ogre-pagedgeometry-master/resources/media/terrain2", "FileSystem");
+	//ResourceGroupManager::getSingleton().addResourceLocation("D:/Development/ogre-pagedgeometry/ogre-pagedgeometry-master/resources/media/trees", "FileSystem");
+	//ResourceGroupManager::getSingleton().addResourceLocation("D:/Development/ogre-pagedgeometry/ogre-pagedgeometry-master/resources/media/trees2", "FileSystem");
+	//ResourceGroupManager::getSingleton().addResourceLocation("D:/Development/ogre-pagedgeometry/ogre-pagedgeometry-master/resources/media/newterrain", "FileSystem");
 
 	ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
@@ -87,6 +94,7 @@ void CGame::Setup()
 	
 	sceneManager->getRootSceneNode()->addChild(lightNode);
 
+
 	// Create an instance of our model and add it to the scene
 	Entity* ent = sceneManager->createEntity("house.mesh");
 	SceneNode* entNode = sceneManager->createSceneNode("Character");
@@ -102,13 +110,6 @@ void CGame::Setup()
 	myListener->setWindow(mWindow);
 	myListener->setApplicationContext(this);
 	mRoot->addFrameListener(myListener);
-	mTerrain = new CTerrain(sceneManager);
-	mTerrain->Initialize(ent->getBoundingBox());
-
-	// Creating Model & Plant placing Instances
-	mModelPlacer = new CModelPlacer(sceneManager, mTerrain);
-	mPlantPlacer = new CPlantPlacer(sceneManager, mTerrain);
-	mPlantPlacer->Initialize();
 
 	// Create an instance of the ImGui overlay and add it to the OverlayManager
 	ImGuiOverlay *imguiOverlay = new ImGuiOverlay();
@@ -117,6 +118,15 @@ void CGame::Setup()
 	Ogre::OverlayManager::getSingleton().addOverlay(imguiOverlay); // now owned by overlaymgr
 	mImguiListener.reset(new ImGuiInputListener());
 	mListenerChain = InputListenerChain({ mImguiListener.get()});
+
+	mTerrain = new CTerrain(sceneManager);
+	mTerrain->Initialize(ent->getBoundingBox());
+	mRoot->addFrameListener(mTerrain);
+
+	// Creating Model & Plant placing Instances
+	mModelPlacer = new CModelPlacer(sceneManager, mTerrain);
+	mPlantPlacer = new CPlantPlacer(sceneManager, mTerrain);
+	mPlantPlacer->Initialize();
 }
 
 void CGame::Update()
@@ -151,15 +161,22 @@ bool MyFrameListener::frameStarted(const FrameEvent &evt)
 	// Debug Gui for FPS and Geometry stats
 	RenderTarget::FrameStats stats = mWindow->getStatistics();
 
+	ImGui::Begin("Stats");
 	ImGui::Text("FPS: %.2f (Avg: %.2f) -- MinFPS: %.2f -- MaxFPS: %.2f", stats.lastFPS, stats.avgFPS, stats.worstFPS, stats.bestFPS);
 	ImGui::Text("Triangle count: %d", stats.triangleCount);
 	ImGui::Text("Batch count: %d", stats.batchCount);
+	if (ImGui::Button("Exit!"))
+	{
+		exit(0);
+	}
+	ImGui::End();
 
 	return true;
 }
 
 bool MyFrameListener::frameEnded(const FrameEvent &evt)
 {
+	ImGui::EndFrame();
 	return true;
 }
 

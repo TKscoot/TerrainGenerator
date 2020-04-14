@@ -3,12 +3,10 @@
 
 void CTerrain::Initialize(AxisAlignedBox box)
 {
-	ogreBox = box;
 
 	mTerrainGlobals = new Ogre::TerrainGlobalOptions();
 	mTerrainGroup = new Ogre::TerrainGroup(mSceneManager, Ogre::Terrain::ALIGN_X_Z, TERRAIN_SIZE, TERRAIN_WORLD_SIZE);
 	mTerrainGroup->setFilenameConvention(TERRAIN_FILE_PREFIX, TERRAIN_FILE_SUFFIX);
-	//mTerrainGroup->setOrigin(mTerrainPos);
 	mTerrainGroup->setOrigin(mTerrainPos);
 
 	Ogre::Light* l = mSceneManager->createLight("terrainLight");
@@ -21,45 +19,17 @@ void CTerrain::Initialize(AxisAlignedBox box)
 
 	ConfigureTerrainDefaults(l);
 
-	for (long x = TERRAIN_PAGE_MIN_X; x <= TERRAIN_PAGE_MAX_X; ++x)
-	{
-		for (long y = TERRAIN_PAGE_MIN_Y; y <= TERRAIN_PAGE_MAX_Y; ++y)
-		{
-			srand(time(NULL));
-			int seed = rand() % 50000;
-
-			SimplexNoise* sn = new SimplexNoise(seed);
-
-			DefineTerrain(x, y);
-		}
-
-	}
-	// sync load since we want everything in place when we start
-	mTerrainGroup->loadAllTerrains(true);
-	mTerrain = mTerrainGroup->getTerrain(0, 0);
-	std::cout << "Terrain ptr: " << mTerrain << std::endl;
-
-	//if (mTerrainsImported)
-	//{
-	TerrainGroup::TerrainIterator ti = mTerrainGroup->getTerrainIterator();
-	while (ti.hasMoreElements())
-	{
-		Terrain* t = ti.getNext()->instance;
-		InitBlendMaps(t);
-	}
-	//}
-
-
-	mTerrainGroup->freeTemporaryResources();
-
+	CreateTerrain();
 }
+
+
 
 void CTerrain::ConfigureTerrainDefaults(Light * l)
 {
 	// Configure global
-	mTerrainGlobals->setMaxPixelError(4);
+	mTerrainGlobals->setMaxPixelError(8);
 	// testing composite map
-	mTerrainGlobals->setCompositeMapDistance(300000);
+	mTerrainGlobals->setCompositeMapDistance(30000);
 
 	// Important to set these so that the terrain knows what to use for derived (non-realtime) data
 	mTerrainGlobals->setLightMapDirection(l->getDerivedDirection());
@@ -74,8 +44,8 @@ void CTerrain::ConfigureTerrainDefaults(Light * l)
 	defaultimp.inputScale = 600;
 	defaultimp.minBatchSize = 33;
 	defaultimp.maxBatchSize = 65;
-	defaultimp.inputFloat = 0;
-	defaultimp.inputImage = 0;
+	defaultimp.inputFloat = nullptr;
+	defaultimp.inputImage = nullptr;
 
 	// textures
 	defaultimp.layerList.resize(3);
@@ -91,17 +61,14 @@ void CTerrain::ConfigureTerrainDefaults(Light * l)
 
 }
 
-void CTerrain::DefineTerrain(long x, long y, float value)
+void CTerrain::DefineTerrain(long x, long y)
 {
-	uint16 terrainSize = mTerrainGroup->getTerrainSize();
+	const uint16 terrainSize = mTerrainGroup->getTerrainSize();
+	uint16 ts = terrainSize * terrainSize;
 	float* heightMap = OGRE_ALLOC_T(float, terrainSize*terrainSize, MEMCATEGORY_GEOMETRY);
 
 	Vector2 worldOffset(Real(x*(terrainSize - 1)), Real(y*(terrainSize - 1)));
 	worldOffset += mOriginPoint;
-
-
-
-	//mHeightScale = 0.5f;
 
 	Vector2 revisedValuePoint;
 	mSeed = 200;
@@ -133,9 +100,6 @@ void CTerrain::DefineTerrain(long x, long y, float value)
 	}
 
 	mTerrainGroup->defineTerrain(x, y, heightMap);
-
-
-
 }
 
 void CTerrain::GetTerrainImage(bool flipX, bool flipY, Image& img)
@@ -169,7 +133,7 @@ void CTerrain::InitBlendMaps(Terrain* terrain)
 
 			blendMap0->convertImageToTerrainSpace(x, y, &tx, &ty);
 			float height = terrain->getHeightAtTerrainPosition(tx, ty);
-
+			
 			*pBlend0++ = Math::saturate((height - minHeight0) / fadeDist0);
 			*pBlend1++ = Math::saturate((height - minHeight1) / fadeDist1);
 		}
@@ -185,7 +149,37 @@ void CTerrain::InitBlendMaps(Terrain* terrain)
 
 void CTerrain::Update()
 {
-	
+}
+
+void CTerrain::CreateTerrain()
+{
+	for (long x = TERRAIN_PAGE_MIN_X; x <= TERRAIN_PAGE_MAX_X; ++x)
+	{
+		for (long y = TERRAIN_PAGE_MIN_Y; y <= TERRAIN_PAGE_MAX_Y; ++y)
+		{
+			srand(time(NULL));
+			int seed = rand() % 50000;
+
+			SimplexNoise* sn = new SimplexNoise(seed);
+
+			DefineTerrain(x, y);
+		}
+
+	}
+	// sync load since we want everything in place when we start
+	mTerrainGroup->loadAllTerrains(true);
+	mTerrain = mTerrainGroup->getTerrain(0, 0);
+	std::cout << "Terrain ptr: " << mTerrain << std::endl;
+
+	TerrainGroup::TerrainIterator ti = mTerrainGroup->getTerrainIterator();
+	while (ti.hasMoreElements())
+	{
+		Terrain* t = ti.getNext()->instance;
+		InitBlendMaps(t);
+	}
+
+	mTerrainGroup->freeTemporaryResources();
+	mTerrain->update();
 
 }
 
@@ -204,7 +198,6 @@ void CTerrain::FlattenTerrainUnderObject(SceneNode * sn)
 
 	for (int i = 0; i < flattenDataArray.size(); i++)
 	{
-
 		flattenDataArray[i].terrainPosition = mTerrain->convertPosition(Terrain::Space::WORLD_SPACE, flattenDataArray[i].corner, Terrain::Space::POINT_SPACE);
 	}
 
@@ -234,4 +227,26 @@ void CTerrain::FlattenTerrainUnderObject(SceneNode * sn)
 
 	}
 	mTerrain->update();
+}
+
+bool CTerrain::frameStarted(const FrameEvent & evt)
+{
+	ImGui::Begin("Terrain");
+	if(ImGui::Button("Generate!"))
+	{
+		CreateTerrain();
+	}
+	ImGui::End();
+
+	return true;
+}
+
+bool CTerrain::frameEnded(const FrameEvent & evt)
+{
+	return true;
+}
+
+bool CTerrain::frameRenderingQueued(const FrameEvent & evt)
+{
+	return true;
 }
