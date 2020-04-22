@@ -1,6 +1,10 @@
 #pragma once
 #include "Ogre.h"
 #include "Bites/OgreInput.h"
+#include "Event.h"
+#include "imgui.h"
+
+#include <Windows.h>
 
 using namespace Ogre;
 using namespace OgreBites;
@@ -9,7 +13,7 @@ class CCamera
 {
 public:
 	void Initialize(SceneManager* sceneManager, RenderWindow* window);
-	void Update(Real deltaTime);
+	bool Update(const FrameEvent& evt);
 
 	void InjectKeyDown(const KeyboardEvent& evt);
 	void InjectKeyUp(const KeyboardEvent& evt);
@@ -23,6 +27,8 @@ public:
 private:
 	Camera*		  mCamera;
 	SceneNode*	  mCamNode;
+	RenderWindow* mWindow;
+	HWND		  mHwnd;
 
 	//movement
 	bool mGoingForward;
@@ -34,5 +40,7 @@ private:
 	bool mFastMove;
 
 	Ogre::Real mTopSpeed = 350;
+
+	bool mFreeLook = false;
 	
 };

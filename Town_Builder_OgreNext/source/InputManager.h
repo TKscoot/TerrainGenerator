@@ -12,8 +12,6 @@ public:
 	virtual ~InputManager(void);
 
 	void initialise(Ogre::RenderWindow *renderWindow);
-	//void capture(void);
-
 	void frameRendered(	  const Ogre::FrameEvent& evt) {}
 	bool keyPressed(	  const KeyboardEvent& evt) 
 	{ 
@@ -31,36 +29,36 @@ public:
 	}
 	bool touchPressed(	  const TouchFingerEvent& evt) 
 	{ 
-		return false; }
+		return false; 
+	}
 	bool touchReleased(	  const TouchFingerEvent& evt) 
 	{ 
-		return false; }
+		return false; 
+	}
 	bool mouseMoved(	  const MouseMotionEvent& evt) 
 	{ 
-		return false; }
+		return false; 
+	}
 	bool mouseWheelRolled(const MouseWheelEvent& evt) 
 	{ 
-		return false; }
+		return false; 
+	}
 	bool mousePressed(	  const MouseButtonEvent& evt) 
 	{ 
-		return false; }
+		return false; 
+	}
 	bool mouseReleased(	  const MouseButtonEvent& evt) 
 	{ 
-		return false; }
+		return false; 
+	}
 	bool textInput(		  const TextInputEvent& evt) 
 	{ 
-		return false; }
-
-	//void removeAllListeners(void);
-	//void removeAllKeyListeners(void);
-	//void removeAllMouseListeners(void);
-	//void removeAllJoystickListeners(void);
-
+		return false; 
+	}
 
 	static InputManager* getSingletonPtr(void);
 
 	// Getter & Setter
-
 	void SetCamera(CCamera* cam) { mCam = cam; }
 
 private:

@@ -20,9 +20,35 @@ void CTerrain::Initialize(AxisAlignedBox box)
 	ConfigureTerrainDefaults(l);
 
 	CreateTerrain();
+
+	CEvent::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CTerrain::Update, this, std::placeholders::_1));
 }
 
+bool CTerrain::Update(const FrameEvent& evt)
+{
 
+	std::ostringstream ss;
+	const char* str0 = mSeed.c_str();
+	char* str = const_cast<char*>(str0);
+	ImGui::Begin("Terrain");
+	if (ImGui::InputText("Seed:", str, IM_ARRAYSIZE(str)))
+	{
+		ss << str0;
+		mSeed = ss.str();
+	}
+	ImGui::SliderInt("Octaves:", &mOctaves, 1, 15);
+	ImGui::SliderFloat("Frequency:", &mFrequency, 0.05f, 5.0f);
+	ImGui::SliderFloat("Height Scale:", &mHeightScale, 0.05f, 2.5f);
+	ImGui::SliderFloat("Power factor:", &mPowerFactor, 0.1f, 3.0f);
+	ImGui::Spacing();
+	if (ImGui::Button("Generate!"))
+	{
+		//CreateTerrain();
+		UpdateTerrainHeight(0, 0);
+	}
+	ImGui::End();
+	return true;
+}
 
 void CTerrain::ConfigureTerrainDefaults(Light * l)
 {
@@ -52,7 +78,7 @@ void CTerrain::ConfigureTerrainDefaults(Light * l)
 	defaultimp.layerList[0].worldSize = 120;
 	defaultimp.layerList[0].textureNames.push_back("dirt_grayrocky_diffusespecular.dds");
 	defaultimp.layerList[0].textureNames.push_back("dirt_grayrocky_normalheight.dds");
-	defaultimp.layerList[1].worldSize = 30;
+	defaultimp.layerList[1].worldSize = 300;
 	defaultimp.layerList[1].textureNames.push_back("grass_green-01_diffusespecular.dds");
 	defaultimp.layerList[1].textureNames.push_back("grass_green-01_normalheight.dds");
 	defaultimp.layerList[2].worldSize = 200;
@@ -63,6 +89,8 @@ void CTerrain::ConfigureTerrainDefaults(Light * l)
 
 void CTerrain::DefineTerrain(long x, long y)
 {
+
+
 	const uint16 terrainSize = mTerrainGroup->getTerrainSize();
 	uint16 ts = terrainSize * terrainSize;
 	float* heightMap = OGRE_ALLOC_T(float, terrainSize*terrainSize, MEMCATEGORY_GEOMETRY);
@@ -71,7 +99,6 @@ void CTerrain::DefineTerrain(long x, long y)
 	worldOffset += mOriginPoint;
 
 	Vector2 revisedValuePoint;
-	mSeed = 200;
 
 	for (uint16 i = 0; i < terrainSize; i++)
 	{
@@ -80,26 +107,73 @@ void CTerrain::DefineTerrain(long x, long y)
 			revisedValuePoint = (worldOffset + Vector2(j, i)) / mCycle;
 
 			float e = 0.0f;
-			mHeightScale = 1.0f;
-			mFrequency = 0.5f;
+			float heightScale = mHeightScale;
+			float frequency = mFrequency;
 			for (uint16 o = 0; o < mOctaves; o++)
 			{
 				e += SimplexNoise::noise(
-					mFrequency * revisedValuePoint.x,
-					mFrequency * revisedValuePoint.y)
-					* mHeightScale;
+					frequency * revisedValuePoint.x,
+					frequency * revisedValuePoint.y)
+					* heightScale;
 
-				mHeightScale = mHeightScale * 0.5f;
-				mFrequency = mFrequency * 2.0f;
+				heightScale = heightScale * 0.5f;
+				frequency   = frequency   * 2.0f;
 			}
 
-			e = std::pow(e, 2.0);
-
+			e = std::pow(e, mPowerFactor);
 			heightMap[i*terrainSize + j] = e;
 		}
 	}
-
 	mTerrainGroup->defineTerrain(x, y, heightMap);
+}
+
+void CTerrain::UpdateTerrainHeight(long x, long y)
+{
+	int simplexSeed = rand() % 50000;
+	SimplexNoise::createPermutations(simplexSeed);
+
+	const uint16 terrainSize = mTerrainGroup->getTerrainSize();
+	uint16 ts = terrainSize * terrainSize;
+	float* heightMap = OGRE_ALLOC_T(float, terrainSize*terrainSize, MEMCATEGORY_GEOMETRY);
+
+	Vector2 worldOffset(Real(x*(terrainSize - 1)), Real(y*(terrainSize - 1)));
+	worldOffset += mOriginPoint;
+
+	Vector2 revisedValuePoint;
+
+	for (uint16 i = 0; i < terrainSize; i++)
+	{
+		for (uint16 j = 0; j < terrainSize; j++)
+		{
+			revisedValuePoint = (worldOffset + Vector2(j, i)) / mCycle;
+
+			float e = 0.0f;
+			float heightScale = mHeightScale;
+			float frequency = mFrequency;
+			for (uint16 o = 0; o < mOctaves; o++)
+			{
+				e += SimplexNoise::noise(
+					frequency * revisedValuePoint.x,
+					frequency * revisedValuePoint.y)
+					* heightScale;
+
+				heightScale = heightScale * 0.5f;
+				frequency   = frequency   * 2.0f;
+			}
+
+			e = std::pow(e, mPowerFactor);
+			mTerrain->setHeightAtPoint(i, j, e * 1000);
+		}
+	}
+	mTerrain->update();
+	mTerrain->getMaterial()->reload();
+
+	TerrainGroup::TerrainIterator ti = mTerrainGroup->getTerrainIterator();
+	while (ti.hasMoreElements())
+	{
+		Terrain* t = ti.getNext()->instance;
+		InitBlendMaps(t);
+	}
 }
 
 void CTerrain::GetTerrainImage(bool flipX, bool flipY, Image& img)
@@ -147,29 +221,38 @@ void CTerrain::InitBlendMaps(Terrain* terrain)
 	blendMap1->update();
 }
 
-void CTerrain::Update()
-{
-}
+
 
 void CTerrain::CreateTerrain()
 {
+	if (mSeed.empty())
+	{
+		srand(time(NULL));
+	}
+	else
+	{
+		std::hash<std::string> hashFunc;
+		int32_t seedHash = hashFunc(mSeed);
+		srand(seedHash);
+	}
+
+	int simplexSeed = rand() % 50000;
+	SimplexNoise::createPermutations(simplexSeed);
+
 	for (long x = TERRAIN_PAGE_MIN_X; x <= TERRAIN_PAGE_MAX_X; ++x)
 	{
 		for (long y = TERRAIN_PAGE_MIN_Y; y <= TERRAIN_PAGE_MAX_Y; ++y)
 		{
-			srand(time(NULL));
-			int seed = rand() % 50000;
-
-			SimplexNoise* sn = new SimplexNoise(seed);
 
 			DefineTerrain(x, y);
 		}
 
 	}
 	// sync load since we want everything in place when we start
+	//mTerrainGroup->updateGeometry();
 	mTerrainGroup->loadAllTerrains(true);
 	mTerrain = mTerrainGroup->getTerrain(0, 0);
-	std::cout << "Terrain ptr: " << mTerrain << std::endl;
+	//mTerrain->dirty();
 
 	TerrainGroup::TerrainIterator ti = mTerrainGroup->getTerrainIterator();
 	while (ti.hasMoreElements())
@@ -177,9 +260,6 @@ void CTerrain::CreateTerrain()
 		Terrain* t = ti.getNext()->instance;
 		InitBlendMaps(t);
 	}
-
-	mTerrainGroup->freeTemporaryResources();
-	mTerrain->update();
 
 }
 
@@ -227,26 +307,4 @@ void CTerrain::FlattenTerrainUnderObject(SceneNode * sn)
 
 	}
 	mTerrain->update();
-}
-
-bool CTerrain::frameStarted(const FrameEvent & evt)
-{
-	//ImGui::Begin("Terrain");
-	//if(ImGui::Button("Generate!"))
-	//{
-	//	CreateTerrain();
-	//}
-	//ImGui::End();
-
-	return true;
-}
-
-bool CTerrain::frameEnded(const FrameEvent & evt)
-{
-	return true;
-}
-
-bool CTerrain::frameRenderingQueued(const FrameEvent & evt)
-{
-	return true;
 }

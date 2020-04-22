@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Camera.cpp" />
+    <ClCompile Include="source\Event.cpp" />
     <ClCompile Include="source\Game.cpp" />
     <ClCompile Include="source\InputManager.cpp" />
     <ClCompile Include="source\ModelPlacer.cpp" />
@@ -42,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Camera.h" />
+    <ClInclude Include="source\Event.h" />
     <ClInclude Include="source\Game.h" />
     <ClInclude Include="source\HeightFunction.h" />
     <ClInclude Include="source\Helpers.h" />

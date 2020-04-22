@@ -18,6 +18,7 @@ void CGame::Setup()
 	// Set Root and Window pointers
 	mRoot = ApplicationContext::getRoot();
 	mWindow = ApplicationContext::getRenderWindow();
+	mWindow->setVSyncEnabled(false);
 	WindowEventUtilities::addWindowEventListener(mWindow, this);
 
 
@@ -34,6 +35,19 @@ void CGame::Setup()
 	// Gui listener
 	sceneManager->addRenderQueueListener(getOverlaySystem());
 
+	// Add Frame events using methods or lambdas
+	CEvent::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CGame::Update, this, std::placeholders::_1));
+	CEvent::GetSingletonPtr()->AddFrameEndedCallback([](const FrameEvent& evt) -> bool 
+	{
+		ImGui::EndFrame();
+		return true;
+	});
+	CEvent::GetSingletonPtr()->AddFrameRenderingQueuedCallback([&cam = mCamera](const FrameEvent& evt) -> bool
+	{
+		cam->FrameRenderingQueued(evt);
+		return true;
+	});
+
 	// Create a new camera
 	mCamera = new CCamera();
 	mCamera->Initialize(sceneManager, mWindow);
@@ -49,7 +63,6 @@ void CGame::Setup()
 
 
 	// Add resources and load/initialise them
-	//ResourceGroupManager::getSingleton().addResourceLocation("media/packs/trees.zip", "Zip");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/packs/Sinbad.zip", "Zip");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/models/", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/ShadowVolume/", "FileSystem");
@@ -62,11 +75,6 @@ void CGame::Setup()
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures/nvidia", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/skyboxes/sunnytropic", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/imgui/resources", "FileSystem", Ogre::ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME);
-	//ResourceGroupManager::getSingleton().addResourceLocation("D:/Development/ogre-pagedgeometry/ogre-pagedgeometry-master/resources/media/grass", "FileSystem");
-	//ResourceGroupManager::getSingleton().addResourceLocation("D:/Development/ogre-pagedgeometry/ogre-pagedgeometry-master/resources/media/terrain2", "FileSystem");
-	//ResourceGroupManager::getSingleton().addResourceLocation("D:/Development/ogre-pagedgeometry/ogre-pagedgeometry-master/resources/media/trees", "FileSystem");
-	//ResourceGroupManager::getSingleton().addResourceLocation("D:/Development/ogre-pagedgeometry/ogre-pagedgeometry-master/resources/media/trees2", "FileSystem");
-	//ResourceGroupManager::getSingleton().addResourceLocation("D:/Development/ogre-pagedgeometry/ogre-pagedgeometry-master/resources/media/newterrain", "FileSystem");
 
 	ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
@@ -83,7 +91,6 @@ void CGame::Setup()
 	// Set Light (Range, Brightness, Fade Speed, Rapid Fade Speed)
 	light1->setAttenuation(10, 0.5, 0.045, 0.0);
 
-
 	// Create light Entity
 	Entity* lightEnt = sceneManager->createEntity("LightEntity", "sphere.mesh");
 	SceneNode* lightNode = sceneManager->createSceneNode("LightNode");
@@ -94,7 +101,6 @@ void CGame::Setup()
 	
 	sceneManager->getRootSceneNode()->addChild(lightNode);
 
-
 	// Create an instance of our model and add it to the scene
 	Entity* ent = sceneManager->createEntity("house.mesh");
 	SceneNode* entNode = sceneManager->createSceneNode("Character");
@@ -103,13 +109,7 @@ void CGame::Setup()
 	entNode->setPosition(100, 1000, -450);
 	entNode->scale(Vector3(20, 20, 20));
 	entNode->showBoundingBox(true);
-	
-	// Create an instance of the MyFrameListener Class and add it to the root object
-	MyFrameListener* myListener = new MyFrameListener();
-	myListener->setCam(mCamera);
-	myListener->setWindow(mWindow);
-	myListener->setApplicationContext(this);
-	mRoot->addFrameListener(myListener);
+
 
 	// Create an instance of the ImGui overlay and add it to the OverlayManager
 	ImGuiOverlay *imguiOverlay = new ImGuiOverlay();
@@ -117,41 +117,30 @@ void CGame::Setup()
 	imguiOverlay->show();
 	Ogre::OverlayManager::getSingleton().addOverlay(imguiOverlay); // now owned by overlaymgr
 	mImguiListener.reset(new ImGuiInputListener());
+	addInputListener(mImguiListener.get());
 	mListenerChain = InputListenerChain({ mImguiListener.get()});
 
 	mTerrain = new CTerrain(sceneManager);
 	mTerrain->Initialize(ent->getBoundingBox());
-	mRoot->addFrameListener(mTerrain);
+	//mRoot->addFrameListener(mTerrain);
 
 	// Creating Model & Plant placing Instances
 	mModelPlacer = new CModelPlacer(sceneManager, mTerrain);
 	mPlantPlacer = new CPlantPlacer(sceneManager, mTerrain);
 	mPlantPlacer->Initialize();
+
 }
 
-void CGame::Update()
+bool CGame::Update(const FrameEvent &evt)
 {
-	mTerrain->Update();
+	//mTerrain->Update();
 	mModelPlacer->Update();
 	mPlantPlacer->Update();
 
 	mWindow->update();
-}
 
-void CGame::Render()
-{
-	// renderOneFrame() instead of beginRendering() to use own game loop
-	mRoot->renderOneFrame();
-}
-
-///
-/// Frame Listener stuff
-///
-
-bool MyFrameListener::frameStarted(const FrameEvent &evt)
-{
-	mApplicationContext->frameStarted(evt);
-	mApplicationContext->pollEvents();
+	pollEvents();
+	//frameStarted(evt);
 
 	WindowEventUtilities::messagePump();
 
@@ -174,14 +163,8 @@ bool MyFrameListener::frameStarted(const FrameEvent &evt)
 	return true;
 }
 
-bool MyFrameListener::frameEnded(const FrameEvent &evt)
+void CGame::Render()
 {
-	ImGui::EndFrame();
-	return true;
-}
-
-bool MyFrameListener::frameRenderingQueued(const FrameEvent &evt)
-{
-	mCam->FrameRenderingQueued(evt);
-	return true;
+	// renderOneFrame() instead of beginRendering() to use own game loop
+	mRoot->renderOneFrame();
 }

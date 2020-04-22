@@ -16,6 +16,7 @@
 #include "Helpers.h"
 #include "InputManager.h"
 #include "imgui.h"
+#include "Event.h"
 
 #define TERRAIN_FILE_PREFIX String("testTerrain")
 #define TERRAIN_FILE_SUFFIX String("dat")
@@ -24,12 +25,12 @@
 
 using namespace Ogre;
 
-class CTerrain : public FrameListener
+class CTerrain
 {
 public:
 	CTerrain(SceneManager* scnMgr) : mSceneManager(scnMgr) {}
 	void Initialize(AxisAlignedBox box);
-	void Update();
+	bool Update(const FrameEvent& evt);
 	void CreateTerrain();
 	
 	void FlattenTerrainUnderObject(SceneNode* sn);
@@ -45,17 +46,12 @@ public:
 		return mTerrain->getGlobalColourMap(); 
 	}
 
-protected:
-	// Frame Listener Callbacks
-	bool frameStarted(const FrameEvent &evt);
-	bool frameEnded(const FrameEvent &evt);
-	bool frameRenderingQueued(const FrameEvent &evt);
-
 private:
 	// Methods
 	void ConfigureTerrainDefaults(Light* l);
 
 	void DefineTerrain(long x, long y);
+	void UpdateTerrainHeight(long x, long y);
 	void GetTerrainImage(bool flipX, bool flipY, Image& img);
 	void InitBlendMaps(Terrain* terrain);
 
@@ -78,11 +74,12 @@ private:
 	Vector3 mTerrainPos;
 	bool	mTerrainsImported = false;
 	Real	mCycle			  = 1024;
-	Real	mHeightScale	  = 4.0f;
+	Real	mHeightScale	  = 1.0f;
 	Vector2 mOriginPoint	  = { 0, 0 };
 
-	float	mFrequency = 1;
+	float	mFrequency = 0.5f;
+	float   mPowerFactor = 2.0f;
 	int		mOctaves = 8;
 
-	float	mSeed = 0;
+	std::string	mSeed = "";
 };

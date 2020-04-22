@@ -26,7 +26,7 @@ int main()
 	{
 		try
 		{
-			game->Update();
+			//game->Update(FrameEvent());
 			game->Render();
 		}
 		catch (const std::exception& e)

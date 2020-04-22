@@ -27,6 +27,7 @@
 #include "Terrain.h"
 #include "ModelPlacer.h"
 #include "PlantPlacer.h"
+#include "Event.h"
 
 using namespace Ogre;
 
@@ -72,7 +73,7 @@ public:
 	}
 
 	void Setup();
-	void Update();
+	bool Update(const FrameEvent &evt);
 	void Render();
 
 	// Getter & Setter
@@ -101,24 +102,5 @@ private:
 
 	// Logic stuff
 	bool mShowCursor = true;
-};
-
-
-// Frame Listener for frame callbacks
-class MyFrameListener : public FrameListener
-{
-public:
-	bool frameStarted(const FrameEvent &evt);
-	bool frameEnded(const FrameEvent &evt);
-	bool frameRenderingQueued(const FrameEvent &evt);
-	void setCam(CCamera* cam) { mCam = cam; }
-	void setRoot(Root* root) { mRoot = root; }
-	void setWindow(RenderWindow* window) { mWindow = window; }
-	void setApplicationContext(ApplicationContext* applicationContext) { mApplicationContext = applicationContext; }
-	
-	CCamera*				   mCam;
-	Root*					   mRoot;
-	RenderWindow*			   mWindow;
-	ApplicationContext*		   mApplicationContext;
 };
 

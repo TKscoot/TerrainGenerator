@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdlib>
 #include <ctime>
+#include "imgui.h"
 
 namespace Helpers
 {

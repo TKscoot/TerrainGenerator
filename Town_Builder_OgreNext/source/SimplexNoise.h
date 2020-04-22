@@ -58,6 +58,19 @@ public:
 		}
 	}
 
+	static void createPermutations(int seed)
+	{
+		permutations.clear();
+		srand(seed);
+
+		for (int i = 0; i < 256; i++)
+		{
+			int r = rand() % 256;
+			permutations.push_back(r);
+			//srand(r);
+		}
+	}
+
 private:
 	// Parameters of Fractional Brownian Motion (fBm) : sum of N "octaves" of noise
 	float mFrequency;   // Frequency ("width") of the first octave of noise (default to 1.0)
