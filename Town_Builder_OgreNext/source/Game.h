@@ -87,6 +87,7 @@ private:
 	Root*					   mRoot;
 	RenderWindow*			   mWindow;
 	RTShader::ShaderGenerator* mShaderGenerator;
+	PSSMShadowCameraSetup*	   mPssmSetup = nullptr;
 
 	// Object Instances
 	InputManager* mInputMgr;

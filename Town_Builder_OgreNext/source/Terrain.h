@@ -9,6 +9,7 @@
 #include <ctime>
 #include <iostream>
 #include "Ogre.h"
+#include "Terrain/OgreTerrainMaterialGeneratorA.h"
 #include "Terrain/OgreTerrain.h"
 #include "Terrain/OgreTerrainGroup.h"
 #include "OgreImGuiOverlay.h"
@@ -29,7 +30,7 @@ class CTerrain
 {
 public:
 	CTerrain(SceneManager* scnMgr) : mSceneManager(scnMgr) {}
-	void Initialize(AxisAlignedBox box);
+	void Initialize(PSSMShadowCameraSetup* pssmSetup);
 	bool Update(const FrameEvent& evt);
 	void CreateTerrain();
 	
@@ -48,7 +49,7 @@ public:
 
 private:
 	// Methods
-	void ConfigureTerrainDefaults(Light* l);
+	void ConfigureTerrainDefaults(/*Light* l*/);
 
 	void DefineTerrain(long x, long y);
 	void UpdateTerrainHeight(long x, long y);
@@ -64,11 +65,13 @@ private:
 	};
 
 	// Vars
-	SceneManager* mSceneManager;
+	SceneManager*		   mSceneManager;
+	PSSMShadowCameraSetup* mPssmSetup = nullptr;
 
-	Ogre::TerrainGlobalOptions* mTerrainGlobals;
-	Ogre::TerrainGroup* mTerrainGroup;
-	Terrain* mTerrain;
+
+	TerrainGlobalOptions* mTerrainGlobals;
+	TerrainGroup*		  mTerrainGroup;
+	Terrain*			  mTerrain;
 
 
 	Vector3 mTerrainPos;

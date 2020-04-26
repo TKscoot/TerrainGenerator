@@ -25,7 +25,7 @@ void CGame::Setup()
 	// Create a new scene manager.
 	SceneManager* sceneManager = mRoot->createSceneManager();
 	sceneManager->setAmbientLight(Ogre::ColourValue(0.0, 0.0, 0.0));
-	std::cout << sceneManager->getName();
+
 
 	//Create ShaderGenerator instance
 	RTShader::ShaderGenerator* shadergen = RTShader::ShaderGenerator::getSingletonPtr();
@@ -61,7 +61,6 @@ void CGame::Setup()
 	mInputMgr->initialise(mWindow);
 	mInputMgr->SetCamera(mCamera);
 
-
 	// Add resources and load/initialise them
 	ResourceGroupManager::getSingleton().addResourceLocation("media/packs/Sinbad.zip", "Zip");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/models/", "FileSystem");
@@ -78,6 +77,41 @@ void CGame::Setup()
 
 	ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
+
+	MaterialPtr casterMat = MaterialManager::getSingletonPtr()->getByName("Ogre/shadow/depth/caster");
+
+	//sceneManager->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_ADDITIVE_INTEGRATED);
+	//sceneManager->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_MODULATIVE_INTEGRATED);
+	sceneManager->setShadowFarDistance(3000);
+
+	// 3 textures per directional light (see http://www.stevestreeting.com/2008/08/2 ... -are-cool/)
+	sceneManager->setShadowTextureCountPerLightType(Ogre::Light::LT_DIRECTIONAL, 3);
+	sceneManager->setShadowTextureSettings(2048, 3, Ogre::PF_FLOAT32_R);  // Uses three 512x512 shadow textures
+   // You can also do a more detailed setup, for example:
+
+	sceneManager->setShadowTextureCount(3);
+	sceneManager->setShadowTextureSelfShadow(true);
+	sceneManager->setShadowCasterRenderBackFaces(true);  // Good for shadow casters like tree leaves
+
+	// Set up caster material - this is just a standard (RTSS compatible) depth/shadow map caster
+	sceneManager->setShadowTextureCasterMaterial(casterMat);
+
+	// shadow camera setup
+	Ogre::PSSMShadowCameraSetup* pssmSetup = new Ogre::PSSMShadowCameraSetup();
+	if (mPssmSetup)
+		delete mPssmSetup;
+	mPssmSetup = pssmSetup;
+
+	mPssmSetup->calculateSplitPoints(3, 0.1, sceneManager->getShadowFarDistance());    // Calculate 3 split points (PSSM 3)
+			// Increase near distance when experiencing artifacts
+	mPssmSetup->setSplitPadding(0.1);
+	mPssmSetup->setOptimalAdjustFactor(0, 2);
+	mPssmSetup->setOptimalAdjustFactor(1, 1);
+	mPssmSetup->setOptimalAdjustFactor(2, 0.5);
+
+	sceneManager->setShadowCameraSetup(Ogre::ShadowCameraSetupPtr(mPssmSetup));
+
+	
 	// Load and apply Skybox
 	sceneManager->setSkyBox(true, "Examples/CloudyNoonSkyBox", 50000, true);
 
@@ -102,13 +136,13 @@ void CGame::Setup()
 	sceneManager->getRootSceneNode()->addChild(lightNode);
 
 	// Create an instance of our model and add it to the scene
-	Entity* ent = sceneManager->createEntity("house.mesh");
-	SceneNode* entNode = sceneManager->createSceneNode("Character");
-	entNode->attachObject(ent);
-	sceneManager->getRootSceneNode()->addChild(entNode);
-	entNode->setPosition(100, 1000, -450);
-	entNode->scale(Vector3(20, 20, 20));
-	entNode->showBoundingBox(true);
+	//Entity* ent = sceneManager->createEntity("house.mesh");
+	//SceneNode* entNode = sceneManager->createSceneNode("Character");
+	//entNode->attachObject(ent);
+	//sceneManager->getRootSceneNode()->addChild(entNode);
+	//entNode->setPosition(100, 1000, -450);
+	//entNode->scale(Vector3(20, 20, 20));
+	//entNode->showBoundingBox(true);
 
 
 	// Create an instance of the ImGui overlay and add it to the OverlayManager
@@ -121,14 +155,13 @@ void CGame::Setup()
 	mListenerChain = InputListenerChain({ mImguiListener.get()});
 
 	mTerrain = new CTerrain(sceneManager);
-	mTerrain->Initialize(ent->getBoundingBox());
+	mTerrain->Initialize(mPssmSetup);
 	//mRoot->addFrameListener(mTerrain);
 
 	// Creating Model & Plant placing Instances
 	mModelPlacer = new CModelPlacer(sceneManager, mTerrain);
 	mPlantPlacer = new CPlantPlacer(sceneManager, mTerrain);
 	mPlantPlacer->Initialize();
-
 }
 
 bool CGame::Update(const FrameEvent &evt)

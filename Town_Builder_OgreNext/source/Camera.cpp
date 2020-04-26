@@ -6,8 +6,6 @@ void CCamera::Initialize(SceneManager* sceneManager, RenderWindow* window)
 	mWindow->getCustomAttribute("WINDOW", &mHwnd);
 
 	mCamera = sceneManager->createCamera("Camera");
-	//mCamera->setPosition(Ogre::Vector3(0, 0, 0));
-	//mCamera->lookAt(Ogre::Vector3(0, 0, 0));
 	mCamera->setNearClipDistance(1);
 
 	mCamNode = sceneManager->getRootSceneNode()->createChildSceneNode("camera", Ogre::Vector3(0, 50000, 15));
@@ -23,8 +21,8 @@ void CCamera::Initialize(SceneManager* sceneManager, RenderWindow* window)
 	mCamera->setAspectRatio(Real(viewport->getActualWidth()) /
 		Real(viewport->getActualHeight()));
 
+	// Add Update Callback
 	CEvent::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CCamera::Update, this, std::placeholders::_1));
-
 }
 
 bool CCamera::Update(const FrameEvent& evt)
@@ -42,7 +40,6 @@ bool CCamera::Update(const FrameEvent& evt)
 	{
 		int x = mWindow->getWidth() * 0.5f;
 		int y = mWindow->getHeight() * 0.5f;
-
 	}
 
 	return true;
@@ -53,13 +50,13 @@ void CCamera::InjectKeyDown(const KeyboardEvent& evt)
 
 	if (mFreeLook)
 	{
-		if (evt.keysym.sym == 'w')	        mGoingForward = true;
-		else if (evt.keysym.sym == 's')	        mGoingBack = true;
-		else if (evt.keysym.sym == 'a')	        mGoingLeft = true;
-		else if (evt.keysym.sym == 'd')	        mGoingRight = true;
-		else if (evt.keysym.sym == 'e')	        mGoingUp = true;
-		else if (evt.keysym.sym == 'q')	        mGoingDown = true;
-		else if (evt.keysym.sym == SDLK_LSHIFT)	mFastMove = true;
+		if		(evt.keysym.sym == 'w')	        mGoingForward = true;
+		else if (evt.keysym.sym == 's')	        mGoingBack	  = true;
+		else if (evt.keysym.sym == 'a')	        mGoingLeft	  = true;
+		else if (evt.keysym.sym == 'd')	        mGoingRight   = true;
+		else if (evt.keysym.sym == 'e')	        mGoingUp	  = true;
+		else if (evt.keysym.sym == 'q')	        mGoingDown	  = true;
+		else if (evt.keysym.sym == SDLK_LSHIFT)	mFastMove	  = true;
 	}
 }
 
@@ -82,7 +79,7 @@ void CCamera::InjectMouseMove(const MouseMotionEvent& evt)
 	if (mFreeLook)
 	{
 		mCamNode->pitch(Ogre::Degree(-evt.yrel * 0.15f), Node::TransformSpace::TS_LOCAL);
-		mCamNode->yaw(Ogre::Degree(  -evt.xrel * 0.15f), Node::TransformSpace::TS_WORLD);
+		mCamNode->yaw(  Ogre::Degree(-evt.xrel * 0.15f), Node::TransformSpace::TS_WORLD);
 	}
 
 	//if (evt.x < 1)
@@ -105,9 +102,6 @@ void CCamera::InjectMouseMove(const MouseMotionEvent& evt)
 	//	ClientToScreen(mHwnd, &p);
 	//	SetCursorPos(p.x, p.y);
 	//}
-
-
-	std::cout << evt.x << std::endl;
 }
 
 bool CCamera::FrameRenderingQueued(const Ogre::FrameEvent& evt)
@@ -151,7 +145,6 @@ bool CCamera::FrameRenderingQueued(const Ogre::FrameEvent& evt)
 
 	if (mVelocity != Ogre::Vector3::ZERO)
 	{
-		//mCamera->move(mVelocity * evt.timeSinceLastFrame);
 		if (mFreeLook)
 		{
 			mCamNode->translate(mVelocity * evt.timeSinceLastFrame);

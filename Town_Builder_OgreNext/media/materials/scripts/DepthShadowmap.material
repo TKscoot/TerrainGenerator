@@ -473,5 +473,3 @@ material Ogre/DepthShadowmap/Receiver/Athene/PCF : Ogre/DepthShadowmap/Receiver/
 		}
 	}
 }
-
-

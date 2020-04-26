@@ -1,8 +1,9 @@
 #include "Terrain.h"
 
 
-void CTerrain::Initialize(AxisAlignedBox box)
+void CTerrain::Initialize(PSSMShadowCameraSetup* pssmSetup)
 {
+	mPssmSetup = pssmSetup;
 
 	mTerrainGlobals = new Ogre::TerrainGlobalOptions();
 	mTerrainGroup = new Ogre::TerrainGroup(mSceneManager, Ogre::Terrain::ALIGN_X_Z, TERRAIN_SIZE, TERRAIN_WORLD_SIZE);
@@ -17,7 +18,7 @@ void CTerrain::Initialize(AxisAlignedBox box)
 	ln->setDirection(Vector3(0.55, -0.8, 0.75).normalisedCopy());
 	ln->attachObject(l);
 
-	ConfigureTerrainDefaults(l);
+	ConfigureTerrainDefaults(/*l*/);
 
 	CreateTerrain();
 
@@ -50,18 +51,43 @@ bool CTerrain::Update(const FrameEvent& evt)
 	return true;
 }
 
-void CTerrain::ConfigureTerrainDefaults(Light * l)
+void CTerrain::ConfigureTerrainDefaults(/*Light * l*/)
 {
 	// Configure global
 	mTerrainGlobals->setMaxPixelError(8);
 	// testing composite map
 	mTerrainGlobals->setCompositeMapDistance(30000);
 
+	Light* l = mSceneManager->getLight("terrainLight");
+
 	// Important to set these so that the terrain knows what to use for derived (non-realtime) data
+	mTerrainGlobals->setUseVertexCompressionWhenAvailable(false);
+	mTerrainGlobals->setCastsDynamicShadows(true);
 	mTerrainGlobals->setLightMapDirection(l->getDerivedDirection());
 	mTerrainGlobals->setCompositeMapAmbient(mSceneManager->getAmbientLight());
 	mTerrainGlobals->setCompositeMapDiffuse(l->getDiffuseColour());
 	mTerrainGlobals->setUseRayBoxDistanceCalculation(true);
+
+	Ogre::TerrainMaterialGeneratorA::SM2Profile* matProfile;
+	matProfile = static_cast<Ogre::TerrainMaterialGeneratorA::SM2Profile*>(
+		mTerrainGlobals->getDefaultMaterialGenerator()->getActiveProfile()
+		);
+
+	//if (enableShadows)
+	//{
+		//  Make sure PSSM is already setup
+		matProfile->setReceiveDynamicShadowsEnabled(true);
+		matProfile->setReceiveDynamicShadowsPSSM(mPssmSetup);  // PSSM shadowing
+		matProfile->setReceiveDynamicShadowsDepth(true);            // with depth
+		matProfile->setReceiveDynamicShadowsLowLod(false);
+
+		matProfile->setLightmapEnabled(false);
+
+	//}
+	//else
+	//{
+	//	matProfile->setReceiveDynamicShadowsPSSM(NULL);
+	//}
 
 	// Configure default import settings for if we use imported image
 	Terrain::ImportData& defaultimp = mTerrainGroup->getDefaultImportSettings();
@@ -85,14 +111,12 @@ void CTerrain::ConfigureTerrainDefaults(Light * l)
 	defaultimp.layerList[2].textureNames.push_back("growth_weirdfungus-03_diffusespecular.dds");
 	defaultimp.layerList[2].textureNames.push_back("growth_weirdfungus-03_normalheight.dds");
 
+
 }
 
 void CTerrain::DefineTerrain(long x, long y)
 {
-
-
 	const uint16 terrainSize = mTerrainGroup->getTerrainSize();
-	uint16 ts = terrainSize * terrainSize;
 	float* heightMap = OGRE_ALLOC_T(float, terrainSize*terrainSize, MEMCATEGORY_GEOMETRY);
 
 	Vector2 worldOffset(Real(x*(terrainSize - 1)), Real(y*(terrainSize - 1)));
@@ -133,13 +157,12 @@ void CTerrain::UpdateTerrainHeight(long x, long y)
 	SimplexNoise::createPermutations(simplexSeed);
 
 	const uint16 terrainSize = mTerrainGroup->getTerrainSize();
-	uint16 ts = terrainSize * terrainSize;
 	float* heightMap = OGRE_ALLOC_T(float, terrainSize*terrainSize, MEMCATEGORY_GEOMETRY);
 
 	Vector2 worldOffset(Real(x*(terrainSize - 1)), Real(y*(terrainSize - 1)));
 	worldOffset += mOriginPoint;
 
-	Vector2 revisedValuePoint;
+	Vector2 revisedValuePoint = Vector2::ZERO;
 
 	for (uint16 i = 0; i < terrainSize; i++)
 	{
@@ -147,9 +170,10 @@ void CTerrain::UpdateTerrainHeight(long x, long y)
 		{
 			revisedValuePoint = (worldOffset + Vector2(j, i)) / mCycle;
 
-			float e = 0.0f;
+			float e			  = 0.0f;
 			float heightScale = mHeightScale;
-			float frequency = mFrequency;
+			float frequency   = mFrequency;
+
 			for (uint16 o = 0; o < mOctaves; o++)
 			{
 				e += SimplexNoise::noise(
@@ -162,18 +186,15 @@ void CTerrain::UpdateTerrainHeight(long x, long y)
 			}
 
 			e = std::pow(e, mPowerFactor);
-			mTerrain->setHeightAtPoint(i, j, e * 1000);
+			mTerrain->setHeightAtPoint(i, j, e * 500);
 		}
 	}
 	mTerrain->update();
+	mTerrain->getMaterial()->_dirtyState();
 	mTerrain->getMaterial()->reload();
+	mTerrainGroup->update();
 
-	TerrainGroup::TerrainIterator ti = mTerrainGroup->getTerrainIterator();
-	while (ti.hasMoreElements())
-	{
-		Terrain* t = ti.getNext()->instance;
-		InitBlendMaps(t);
-	}
+	InitBlendMaps(mTerrain);
 }
 
 void CTerrain::GetTerrainImage(bool flipX, bool flipY, Image& img)
@@ -190,7 +211,6 @@ void CTerrain::GetTerrainImage(bool flipX, bool flipY, Image& img)
 void CTerrain::InitBlendMaps(Terrain* terrain)
 {
 	//! [blendmap]
-	using namespace Ogre;
 	TerrainLayerBlendMap* blendMap0 = terrain->getLayerBlendMap(1);
 	TerrainLayerBlendMap* blendMap1 = terrain->getLayerBlendMap(2);
 	float minHeight0 = 5;
