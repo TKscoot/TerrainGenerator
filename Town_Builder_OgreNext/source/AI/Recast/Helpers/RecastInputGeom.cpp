@@ -33,8 +33,9 @@
 
 */
 
-#include "RecastInputGeom.h"
+#include "AI/Recast/Helpers/RecastInputGeom.h"
 #include "Common/Helpers.h"
+#include "AI/Recast/Include/Recast.h"
 #include <OgreStreamSerialiser.h>
 #include <float.h>
 #include <cstdio>

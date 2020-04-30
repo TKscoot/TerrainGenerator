@@ -17,14 +17,14 @@ namespace Helpers
 
 namespace OgreRecast
 {
-	void OgreVect3ToFloatA(const Ogre::Vector3 vect, float* result)
+	static void OgreVect3ToFloatA(const Ogre::Vector3 vect, float* result)
 	{
 		result[0] = vect[0];
 		result[1] = vect[1];
 		result[2] = vect[2];
 	};
 
-	void FloatAToOgreVect3(const float* vect, Ogre::Vector3 &result)
+	static void FloatAToOgreVect3(const float* vect, Ogre::Vector3 &result)
 	{
 		result.x = vect[0];
 		result.y = vect[1];

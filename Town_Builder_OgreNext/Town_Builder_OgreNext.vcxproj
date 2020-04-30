@@ -19,6 +19,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\AI\AIAgent.cpp" />
+    <ClCompile Include="source\AI\Recast\Helpers\RecastInputGeom.cpp" />
+    <ClCompile Include="source\AI\Recast\Source\Recast.cpp" />
+    <ClCompile Include="source\AI\Recast\Source\RecastAlloc.cpp" />
+    <ClCompile Include="source\AI\Recast\Source\RecastArea.cpp" />
+    <ClCompile Include="source\AI\Recast\Source\RecastAssert.cpp" />
+    <ClCompile Include="source\AI\Recast\Source\RecastContour.cpp" />
+    <ClCompile Include="source\AI\Recast\Source\RecastFilter.cpp" />
+    <ClCompile Include="source\AI\Recast\Source\RecastLayers.cpp" />
+    <ClCompile Include="source\AI\Recast\Source\RecastMesh.cpp" />
+    <ClCompile Include="source\AI\Recast\Source\RecastMeshDetail.cpp" />
+    <ClCompile Include="source\AI\Recast\Source\RecastRasterization.cpp" />
+    <ClCompile Include="source\AI\Recast\Source\RecastRegion.cpp" />
     <ClCompile Include="source\Game\Camera.cpp" />
     <ClCompile Include="source\Engine\Event.cpp" />
     <ClCompile Include="source\Game\Game.cpp" />
@@ -39,9 +52,13 @@
     <ClCompile Include="source\Common\SimplexNoise.cpp" />
     <ClCompile Include="source\Game\Terrain\Terrain.cpp" />
     <ClCompile Include="source\main.cpp" />
-    <ClCompile Include="source\Recast\RecastInputGeom.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\AI\AIAgent.h" />
+    <ClInclude Include="source\AI\Recast\Helpers\RecastInputGeom.h" />
+    <ClInclude Include="source\AI\Recast\Include\Recast.h" />
+    <ClInclude Include="source\AI\Recast\Include\RecastAlloc.h" />
+    <ClInclude Include="source\AI\Recast\Include\RecastAssert.h" />
     <ClInclude Include="source\Game\Camera.h" />
     <ClInclude Include="source\Engine\Event.h" />
     <ClInclude Include="source\Game\Game.h" />
@@ -64,7 +81,6 @@
     <ClInclude Include="source\Game\Terrain\PlantPlacer.h" />
     <ClInclude Include="source\Common\SimplexNoise.h" />
     <ClInclude Include="source\Game\Terrain\Terrain.h" />
-    <ClInclude Include="source\Recast\RecastInputGeom.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -144,7 +160,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)\source;%OGRE_SDK%\include\OGRE\RTShaderSystem;%OGRE_SDK%\include\OGRE\Overlay;%OGRE_SDK%\include\OGRE\Bites;%OGRE_SDK%\include\OGRE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\source;%OGRE_SDK%\include\OGRE\RTShaderSystem;%OGRE_SDK%\include\OGRE\Overlay;%OGRE_SDK%\include\OGRE\Bites;%OGRE_SDK%\include\OGRE;$(ProjectDir)\source\AI\Recast\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

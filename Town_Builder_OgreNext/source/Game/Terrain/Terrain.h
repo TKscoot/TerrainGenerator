@@ -18,7 +18,7 @@
 #include "Engine/InputManager.h"
 #include "imgui.h"
 #include "Engine/Event.h"
-#include "Recast/RecastInputGeom.h"
+#include "AI/Recast/Helpers/RecastInputGeom.h"
 
 #define TERRAIN_FILE_PREFIX String("testTerrain")
 #define TERRAIN_FILE_SUFFIX String("dat")
