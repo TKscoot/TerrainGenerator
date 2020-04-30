@@ -1,5 +1,5 @@
 #include "PlantPlacer.h"
-#include "HeightFunction.h"
+#include "Common/HeightFunction.h"
 
 
 void CPlantPlacer::Initialize()

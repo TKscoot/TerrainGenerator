@@ -13,11 +13,12 @@
 #include "Terrain/OgreTerrain.h"
 #include "Terrain/OgreTerrainGroup.h"
 #include "OgreImGuiOverlay.h"
-#include "SimplexNoise.h"
-#include "Helpers.h"
-#include "InputManager.h"
+#include "Common/SimplexNoise.h"
+#include "Common/Helpers.h"
+#include "Engine/InputManager.h"
 #include "imgui.h"
-#include "Event.h"
+#include "Engine/Event.h"
+#include "Recast/RecastInputGeom.h"
 
 #define TERRAIN_FILE_PREFIX String("testTerrain")
 #define TERRAIN_FILE_SUFFIX String("dat")
@@ -49,7 +50,7 @@ public:
 
 private:
 	// Methods
-	void ConfigureTerrainDefaults(/*Light* l*/);
+	void ConfigureTerrainDefaults();
 
 	void DefineTerrain(long x, long y);
 	void UpdateTerrainHeight(long x, long y);
@@ -72,6 +73,7 @@ private:
 	TerrainGlobalOptions* mTerrainGlobals;
 	TerrainGroup*		  mTerrainGroup;
 	Terrain*			  mTerrain;
+	InputGeom*			  mInputGeom;
 
 
 	Vector3 mTerrainPos;

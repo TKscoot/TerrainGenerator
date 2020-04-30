@@ -48,34 +48,34 @@
     <ClCompile Include="source\PagedGeometry\WindBatchPage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\InputManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ModelPlacer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\PlantPlacer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\SimplexNoise.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Terrain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Event.cpp">
+    <ClCompile Include="source\Game\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Game\Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Event.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\InputManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Common\SimplexNoise.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Game\Terrain\ModelPlacer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Game\Terrain\PlantPlacer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Game\Terrain\Terrain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Recast\RecastInputGeom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,40 +116,37 @@
     <ClInclude Include="source\PagedGeometry\WindBatchPage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Camera.h">
+    <ClInclude Include="source\Game\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Game.h">
+    <ClInclude Include="source\Game\Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\HeightFunction.h">
+    <ClInclude Include="source\Engine\Event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Helpers.h">
+    <ClInclude Include="source\Common\HeightFunction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\InputManager.h">
+    <ClInclude Include="source\Common\Helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\ModelPlacer.h">
+    <ClInclude Include="source\Engine\InputManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\OgreStableHeaders.h">
+    <ClInclude Include="source\Common\SimplexNoise.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\PlantPlacer.h">
+    <ClInclude Include="source\Game\Terrain\Terrain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\SimplexNoise.h">
+    <ClInclude Include="source\Game\Terrain\ModelPlacer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Terrain.h">
+    <ClInclude Include="source\Game\Terrain\PlantPlacer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Event.h">
+    <ClInclude Include="source\Recast\RecastInputGeom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

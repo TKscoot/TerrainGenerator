@@ -3,7 +3,6 @@
 void CCamera::Initialize(SceneManager* sceneManager, RenderWindow* window)
 {
 	mWindow = window;
-	mWindow->getCustomAttribute("WINDOW", &mHwnd);
 
 	mCamera = sceneManager->createCamera("Camera");
 	mCamera->setNearClipDistance(1);
@@ -82,45 +81,25 @@ void CCamera::InjectMouseMove(const MouseMotionEvent& evt)
 		mCamNode->yaw(  Ogre::Degree(-evt.xrel * 0.15f), Node::TransformSpace::TS_WORLD);
 	}
 
-	//if (evt.x < 1)
-	//{
-	//
-	//	POINT p;
-	//	p.x = mWindow->getWidth();
-	//	p.y = evt.y;
-	//
-	//	ClientToScreen(mHwnd, &p);
-	//	SetCursorPos(p.x, p.y);
-	//
-	//}
-	//else if (evt.x > mWindow->getWidth() - 3)
-	//{
-	//	POINT p;
-	//	p.x = 0;
-	//	p.y = evt.y;
-	//
-	//	ClientToScreen(mHwnd, &p);
-	//	SetCursorPos(p.x, p.y);
-	//}
 }
 
 bool CCamera::FrameRenderingQueued(const Ogre::FrameEvent& evt)
 {
 
 	Quaternion orientation = mCamNode->_getDerivedOrientation();
-	Vector3 up		= orientation * Vector3::UNIT_Y;
-	Vector3 forward = orientation * Vector3::UNIT_Z;
-	Vector3 right	= orientation * Vector3::UNIT_X;
+	Vector3    up		   = orientation * Vector3::UNIT_Y;
+	Vector3    forward     = orientation * Vector3::UNIT_Z;
+	Vector3    right	   = orientation * Vector3::UNIT_X;
 
 
 	// build our acceleration vector based on keyboard input composite
-	Ogre::Vector3 accel = Ogre::Vector3::ZERO;
+	Ogre::Vector3      accel  = Ogre::Vector3::ZERO;
 	if (mGoingForward) accel -= forward;
-	if (mGoingBack) accel	 += forward;
-	if (mGoingRight) accel	 += right;
-	if (mGoingLeft) accel	 -= right;
-	if (mGoingUp) accel		 += up;
-	if (mGoingDown) accel	 -= up;
+	if (mGoingBack)    accel += forward;
+	if (mGoingRight)   accel += right;
+	if (mGoingLeft)    accel -= right;
+	if (mGoingUp)      accel += up;
+	if (mGoingDown)    accel -= up;
 
 	// if accelerating, try to reach top speed in a certain time
 	Ogre::Real topSpeed = mFastMove ? mTopSpeed * 10 : mTopSpeed;

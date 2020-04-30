@@ -1,7 +1,7 @@
 #pragma once
 #include "Bites/OgreInput.h"
 #include <OgreRenderWindow.h>
-#include "Camera.h"
+#include "Game/Camera.h"
 
 using namespace Ogre;
 using namespace OgreBites;

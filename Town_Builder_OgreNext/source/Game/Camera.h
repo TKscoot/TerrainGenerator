@@ -1,7 +1,7 @@
 #pragma once
 #include "Ogre.h"
 #include "Bites/OgreInput.h"
-#include "Event.h"
+#include "Engine/Event.h"
 #include "imgui.h"
 
 #include <Windows.h>
@@ -28,7 +28,6 @@ private:
 	Camera*		  mCamera;
 	SceneNode*	  mCamNode;
 	RenderWindow* mWindow;
-	HWND		  mHwnd;
 
 	//movement
 	bool mGoingForward;

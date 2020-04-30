@@ -18,11 +18,14 @@ void CTerrain::Initialize(PSSMShadowCameraSetup* pssmSetup)
 	ln->setDirection(Vector3(0.55, -0.8, 0.75).normalisedCopy());
 	ln->attachObject(l);
 
-	ConfigureTerrainDefaults(/*l*/);
+	ConfigureTerrainDefaults();
 
 	CreateTerrain();
 
 	CEvent::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CTerrain::Update, this, std::placeholders::_1));
+
+	mInputGeom = new InputGeom(mTerrainGroup);
+	mInputGeom->getVerts();
 }
 
 bool CTerrain::Update(const FrameEvent& evt)
@@ -32,19 +35,18 @@ bool CTerrain::Update(const FrameEvent& evt)
 	const char* str0 = mSeed.c_str();
 	char* str = const_cast<char*>(str0);
 	ImGui::Begin("Terrain");
-	if (ImGui::InputText("Seed:", str, IM_ARRAYSIZE(str)))
+	if (ImGui::InputText("Seed", str, IM_ARRAYSIZE(str)))
 	{
 		ss << str0;
 		mSeed = ss.str();
 	}
-	ImGui::SliderInt("Octaves:", &mOctaves, 1, 15);
-	ImGui::SliderFloat("Frequency:", &mFrequency, 0.05f, 5.0f);
-	ImGui::SliderFloat("Height Scale:", &mHeightScale, 0.05f, 2.5f);
-	ImGui::SliderFloat("Power factor:", &mPowerFactor, 0.1f, 3.0f);
+	ImGui::SliderInt  ("Octaves",      &mOctaves,     1,     15);
+	ImGui::SliderFloat("Frequency",	   &mFrequency,   0.05f, 5.0f);
+	ImGui::SliderFloat("Height Scale", &mHeightScale, 0.05f, 2.5f);
+	ImGui::SliderFloat("Power factor", &mPowerFactor, 0.1f,  3.0f);
 	ImGui::Spacing();
 	if (ImGui::Button("Generate!"))
 	{
-		//CreateTerrain();
 		UpdateTerrainHeight(0, 0);
 	}
 	ImGui::End();
@@ -153,8 +155,22 @@ void CTerrain::DefineTerrain(long x, long y)
 
 void CTerrain::UpdateTerrainHeight(long x, long y)
 {
+	// TODO: Wrap into function. UpdateSeed() or whatever
+	// {
+	if (mSeed.empty())
+	{
+		srand(time(NULL));
+	}
+	else
+	{
+		std::hash<std::string> hashFunc;
+		int32_t seedHash = hashFunc(mSeed);
+		srand(seedHash);
+	}
+
 	int simplexSeed = rand() % 50000;
 	SimplexNoise::createPermutations(simplexSeed);
+	// }
 
 	const uint16 terrainSize = mTerrainGroup->getTerrainSize();
 	float* heightMap = OGRE_ALLOC_T(float, terrainSize*terrainSize, MEMCATEGORY_GEOMETRY);
@@ -213,12 +229,13 @@ void CTerrain::InitBlendMaps(Terrain* terrain)
 	//! [blendmap]
 	TerrainLayerBlendMap* blendMap0 = terrain->getLayerBlendMap(1);
 	TerrainLayerBlendMap* blendMap1 = terrain->getLayerBlendMap(2);
-	float minHeight0 = 5;
-	float fadeDist0 = 15;
-	float minHeight1 = 200;
-	float fadeDist1 = 15;
-	float* pBlend0 = blendMap0->getBlendPointer();
-	float* pBlend1 = blendMap1->getBlendPointer();
+	float  minHeight0 = 5;
+	float  fadeDist0  = 15;
+	float  minHeight1 = 200;
+	float  fadeDist1  = 15;
+	float* pBlend0    = blendMap0->getBlendPointer();
+	float* pBlend1    = blendMap1->getBlendPointer();
+
 	for (uint16 y = 0; y < terrain->getLayerBlendMapSize(); ++y)
 	{
 		for (uint16 x = 0; x < terrain->getLayerBlendMapSize(); ++x)
@@ -233,18 +250,16 @@ void CTerrain::InitBlendMaps(Terrain* terrain)
 		}
 	}
 
-	std::cout << "Blendmap size: " << terrain->getLayerBlendMapSize() << std::endl;
-
 	blendMap0->dirty();
 	blendMap1->dirty();
 	blendMap0->update();
 	blendMap1->update();
 }
 
-
-
 void CTerrain::CreateTerrain()
 {
+	// TODO: Wrap into function. UpdateSeed() or whatever
+	// {
 	if (mSeed.empty())
 	{
 		srand(time(NULL));
@@ -258,6 +273,7 @@ void CTerrain::CreateTerrain()
 
 	int simplexSeed = rand() % 50000;
 	SimplexNoise::createPermutations(simplexSeed);
+	// }
 
 	for (long x = TERRAIN_PAGE_MIN_X; x <= TERRAIN_PAGE_MAX_X; ++x)
 	{

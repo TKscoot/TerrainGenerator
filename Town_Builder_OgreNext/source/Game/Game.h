@@ -22,12 +22,12 @@
 #include "Bites/OgreImGuiInputListener.h"
 
 // Game Logic
-#include "InputManager.h"
+#include "Engine/InputManager.h"
 #include "Camera.h"
-#include "Terrain.h"
-#include "ModelPlacer.h"
-#include "PlantPlacer.h"
-#include "Event.h"
+#include "Game/Terrain/Terrain.h"
+#include "Game/Terrain/ModelPlacer.h"
+#include "Game/Terrain/PlantPlacer.h"
+#include "Engine/Event.h"
 
 using namespace Ogre;
 

@@ -1,4 +1,3 @@
-#include "pch.h" 
 /*-------------------------------------------------------------------------------------
 Copyright (c) 2006 John Judnich
 Modified 2008 by Erik Hjortsberg (erik.hjortsberg@iteam.se)

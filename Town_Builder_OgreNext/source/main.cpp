@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Game.h"
+#include "Game/Game.h"
 
 bool g_running = false;
 

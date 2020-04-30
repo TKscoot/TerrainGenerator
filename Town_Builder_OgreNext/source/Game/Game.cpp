@@ -1,6 +1,9 @@
-#include "pch.h"
 #include "Game.h"
-
+template <typename R, typename ... Types>
+constexpr std::integral_constant<unsigned, sizeof ...(Types)> getArgumentCount(R(*f)(Types ...))
+{
+	return std::integral_constant<unsigned, sizeof ...(Types)>{};
+}
 CGame::CGame() : ApplicationContext("Town Builder")
 {
 }
@@ -80,8 +83,6 @@ void CGame::Setup()
 
 	MaterialPtr casterMat = MaterialManager::getSingletonPtr()->getByName("Ogre/shadow/depth/caster");
 
-	//sceneManager->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_ADDITIVE_INTEGRATED);
-	//sceneManager->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_MODULATIVE_INTEGRATED);
 	sceneManager->setShadowFarDistance(3000);
 
 	// 3 textures per directional light (see http://www.stevestreeting.com/2008/08/2 ... -are-cool/)
@@ -156,7 +157,6 @@ void CGame::Setup()
 
 	mTerrain = new CTerrain(sceneManager);
 	mTerrain->Initialize(mPssmSetup);
-	//mRoot->addFrameListener(mTerrain);
 
 	// Creating Model & Plant placing Instances
 	mModelPlacer = new CModelPlacer(sceneManager, mTerrain);
@@ -166,14 +166,12 @@ void CGame::Setup()
 
 bool CGame::Update(const FrameEvent &evt)
 {
-	//mTerrain->Update();
 	mModelPlacer->Update();
 	mPlantPlacer->Update();
 
 	mWindow->update();
 
 	pollEvents();
-	//frameStarted(evt);
 
 	WindowEventUtilities::messagePump();
 
