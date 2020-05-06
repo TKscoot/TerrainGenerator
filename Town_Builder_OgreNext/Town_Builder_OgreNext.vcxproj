@@ -65,6 +65,7 @@
     <ClInclude Include="source\Common\HeightFunction.h" />
     <ClInclude Include="source\Common\Helpers.h" />
     <ClInclude Include="source\Engine\InputManager.h" />
+    <ClInclude Include="source\Game\Terrain\Erosion.h" />
     <ClInclude Include="source\Game\Terrain\ModelPlacer.h" />
     <ClInclude Include="source\PagedGeometry\BatchedGeometry.h" />
     <ClInclude Include="source\PagedGeometry\BatchPage.h" />

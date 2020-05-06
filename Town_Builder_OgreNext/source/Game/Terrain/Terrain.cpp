@@ -18,6 +18,8 @@ void CTerrain::Initialize(PSSMShadowCameraSetup* pssmSetup)
 	ln->setDirection(Vector3(0.55, -0.8, 0.75).normalisedCopy());
 	ln->attachObject(l);
 
+	mErosion = new CErosion();
+
 	ConfigureTerrainDefaults();
 
 	CreateTerrain();
@@ -34,7 +36,7 @@ bool CTerrain::Update(const FrameEvent& evt)
 	std::ostringstream ss;
 	const char* str0 = mSeed.c_str();
 	char* str = const_cast<char*>(str0);
-	ImGui::Begin("Terrain");
+	ImGui::BeginChild("Terrain", ImVec2(0, 180), true);
 	if (ImGui::InputText("Seed", str, IM_ARRAYSIZE(str)))
 	{
 		ss << str0;
@@ -49,6 +51,18 @@ bool CTerrain::Update(const FrameEvent& evt)
 	{
 		UpdateTerrainHeight(0, 0);
 	}
+	if (ImGui::Button("Erode!"))
+	{
+		std::cout << "Began erosion" << std::endl;
+
+		float* map = mTerrain->getHeightData();
+		mErosion->Erode(map, mTerrain->getSize(), 100);
+		mTerrain->dirty();
+		mTerrain->update();
+
+		std::cout << "Ended erosion" << std::endl;
+	}
+	ImGui::EndChild();
 	ImGui::End();
 	return true;
 }
@@ -75,21 +89,14 @@ void CTerrain::ConfigureTerrainDefaults(/*Light * l*/)
 		mTerrainGlobals->getDefaultMaterialGenerator()->getActiveProfile()
 		);
 
-	//if (enableShadows)
-	//{
-		//  Make sure PSSM is already setup
-		matProfile->setReceiveDynamicShadowsEnabled(true);
-		matProfile->setReceiveDynamicShadowsPSSM(mPssmSetup);  // PSSM shadowing
-		matProfile->setReceiveDynamicShadowsDepth(true);            // with depth
-		matProfile->setReceiveDynamicShadowsLowLod(false);
+	//  Make sure PSSM is already setup
+	matProfile->setReceiveDynamicShadowsEnabled(true);
+	matProfile->setReceiveDynamicShadowsPSSM(mPssmSetup);  // PSSM shadowing
+	matProfile->setReceiveDynamicShadowsDepth(true);       // with depth
+	matProfile->setReceiveDynamicShadowsLowLod(false);
 
-		matProfile->setLightmapEnabled(false);
+	matProfile->setLightmapEnabled(false);
 
-	//}
-	//else
-	//{
-	//	matProfile->setReceiveDynamicShadowsPSSM(NULL);
-	//}
 
 	// Configure default import settings for if we use imported image
 	Terrain::ImportData& defaultimp = mTerrainGroup->getDefaultImportSettings();
@@ -150,11 +157,21 @@ void CTerrain::DefineTerrain(long x, long y)
 			heightMap[i*terrainSize + j] = e;
 		}
 	}
+
+	std::cout << "Began erosion" << std::endl;
+	////for (int i = 0; i < 100; i++)
+	////{
+	//	mErosion->Erode(heightMap, terrainSize, 100);
+	////}
+	std::cout << "Ended erosion" << std::endl;
+
 	mTerrainGroup->defineTerrain(x, y, heightMap);
 }
 
 void CTerrain::UpdateTerrainHeight(long x, long y)
 {
+	mIsUpdated = false;
+
 	// TODO: Wrap into function. UpdateSeed() or whatever
 	// {
 	if (mSeed.empty())
@@ -211,6 +228,8 @@ void CTerrain::UpdateTerrainHeight(long x, long y)
 	mTerrainGroup->update();
 
 	InitBlendMaps(mTerrain);
+
+	mIsUpdated = true;
 }
 
 void CTerrain::GetTerrainImage(bool flipX, bool flipY, Image& img)
@@ -244,7 +263,7 @@ void CTerrain::InitBlendMaps(Terrain* terrain)
 
 			blendMap0->convertImageToTerrainSpace(x, y, &tx, &ty);
 			float height = terrain->getHeightAtTerrainPosition(tx, ty);
-			
+
 			*pBlend0++ = Math::saturate((height - minHeight0) / fadeDist0);
 			*pBlend1++ = Math::saturate((height - minHeight1) / fadeDist1);
 		}
@@ -258,6 +277,8 @@ void CTerrain::InitBlendMaps(Terrain* terrain)
 
 void CTerrain::CreateTerrain()
 {
+	mIsUpdated = false;
+
 	// TODO: Wrap into function. UpdateSeed() or whatever
 	// {
 	if (mSeed.empty())
@@ -297,10 +318,13 @@ void CTerrain::CreateTerrain()
 		InitBlendMaps(t);
 	}
 
+	mIsUpdated = true;
 }
 
 void CTerrain::FlattenTerrainUnderObject(SceneNode * sn)
 {
+	mIsUpdated = false;
+
 	//SceneNode* character = mSceneManager->getSceneNode("Character");
 	AxisAlignedBox aabb = sn->_getWorldAABB();
 
@@ -343,4 +367,6 @@ void CTerrain::FlattenTerrainUnderObject(SceneNode * sn)
 
 	}
 	mTerrain->update();
+
+	mIsUpdated = true;
 }

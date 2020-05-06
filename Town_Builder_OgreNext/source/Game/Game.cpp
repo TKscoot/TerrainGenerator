@@ -28,8 +28,7 @@ void CGame::Setup()
 	// Create a new scene manager.
 	SceneManager* sceneManager = mRoot->createSceneManager();
 	sceneManager->setAmbientLight(Ogre::ColourValue(0.0, 0.0, 0.0));
-
-
+	
 	//Create ShaderGenerator instance
 	RTShader::ShaderGenerator* shadergen = RTShader::ShaderGenerator::getSingletonPtr();
 	shadergen->addSceneManager(sceneManager);
@@ -181,16 +180,18 @@ bool CGame::Update(const FrameEvent &evt)
 	// Debug Gui for FPS and Geometry stats
 	RenderTarget::FrameStats stats = mWindow->getStatistics();
 
-	ImGui::Begin("Stats");
-	ImGui::Text("FPS: %.2f (Avg: %.2f) -- MinFPS: %.2f -- MaxFPS: %.2f", stats.lastFPS, stats.avgFPS, stats.worstFPS, stats.bestFPS);
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::SetNextWindowSize(ImVec2(400, mWindow->getHeight()));
+	ImGui::Begin("", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+	ImGui::BeginChild("Stats", ImVec2(0, 90), true);
+	ImGui::Text("FPS: %.2f (Avg: %.2f) -- MaxFPS: %.2f", stats.lastFPS, stats.avgFPS, stats.bestFPS);
 	ImGui::Text("Triangle count: %d", stats.triangleCount);
 	ImGui::Text("Batch count: %d", stats.batchCount);
 	if (ImGui::Button("Exit!"))
 	{
 		exit(0);
 	}
-	ImGui::End();
-
+	ImGui::EndChild();
 	return true;
 }
 

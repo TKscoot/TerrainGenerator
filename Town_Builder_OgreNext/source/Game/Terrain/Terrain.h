@@ -19,6 +19,7 @@
 #include "imgui.h"
 #include "Engine/Event.h"
 #include "AI/Recast/Helpers/RecastInputGeom.h"
+#include "Erosion.h"
 
 #define TERRAIN_FILE_PREFIX String("testTerrain")
 #define TERRAIN_FILE_SUFFIX String("dat")
@@ -48,6 +49,9 @@ public:
 		return mTerrain->getGlobalColourMap(); 
 	}
 
+	bool IsUpdated() { return mIsUpdated; }
+	InputGeom* GetInputGeom() { return mInputGeom; }
+
 private:
 	// Methods
 	void ConfigureTerrainDefaults();
@@ -74,7 +78,7 @@ private:
 	TerrainGroup*		  mTerrainGroup;
 	Terrain*			  mTerrain;
 	InputGeom*			  mInputGeom;
-
+	CErosion*             mErosion;
 
 	Vector3 mTerrainPos;
 	bool	mTerrainsImported = false;
@@ -87,4 +91,5 @@ private:
 	int		mOctaves = 8;
 
 	std::string	mSeed = "";
+	bool mIsUpdated = false;
 };

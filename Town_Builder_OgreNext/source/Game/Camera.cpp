@@ -26,9 +26,9 @@ void CCamera::Initialize(SceneManager* sceneManager, RenderWindow* window)
 
 bool CCamera::Update(const FrameEvent& evt)
 {
-	ImGui::Begin("Camera");
+	ImGui::BeginChild("Camera", ImVec2(0, 35), true);
 	ImGui::Checkbox("Freelook camera", &mFreeLook);
-	ImGui::End();
+	ImGui::EndChild();
 
 	if (!mFreeLook)
 	{
