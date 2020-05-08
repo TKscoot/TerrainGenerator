@@ -114,6 +114,9 @@
     <ClCompile Include="source\AI\AIAgent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NavMeshBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\PagedGeometry\BatchedGeometry.h">
@@ -198,6 +201,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Game\Terrain\Erosion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NavMeshBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

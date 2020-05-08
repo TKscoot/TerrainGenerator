@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="NavMeshBuilder.cpp" />
     <ClCompile Include="source\AI\AIAgent.cpp" />
     <ClCompile Include="source\AI\Recast\Helpers\RecastInputGeom.cpp" />
     <ClCompile Include="source\AI\Recast\Source\Recast.cpp" />
@@ -54,6 +55,7 @@
     <ClCompile Include="source\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="NavMeshBuilder.h" />
     <ClInclude Include="source\AI\AIAgent.h" />
     <ClInclude Include="source\AI\Recast\Helpers\RecastInputGeom.h" />
     <ClInclude Include="source\AI\Recast\Include\Recast.h" />
