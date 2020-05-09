@@ -14,10 +14,10 @@ CNavMeshBuilder::~CNavMeshBuilder()
 //TODO: Get agent information
 void CNavMeshBuilder::BuildNavMesh(InputGeom* geom)
 {
-	std::cout << "Starting nav mesh generation" << std::endl;
+	std::cout << "Starting navmesh generation" << std::endl;
 	if(geom->isEmpty())
 	{
-		std::cout << "ERROR: Input geometry is empty. Cancelling nav mesh generation" << std::endl;
+		std::cout << "ERROR: Input geometry is empty. Cancelling navmesh generation" << std::endl;
 		return;
 	}
 
@@ -59,7 +59,7 @@ void CNavMeshBuilder::BuildNavMesh(InputGeom* geom)
 	rcCalcGridSize(m_rcConfig.bmin, m_rcConfig.bmax, m_rcConfig.cs, &m_rcConfig.width, &m_rcConfig.height);
 	std::cout << "Grid size: " << m_rcConfig.width << " x " << m_rcConfig.height << std::endl;
 
-	std::cout << "Starting nav mesh build process" << std::endl;
+	std::cout << "Starting navmesh build process" << std::endl;
 	std::cout << "Creating heightfield..." << std::endl;
 
 	// Allocate voxel heightfield where we rasterize our input data to.
@@ -68,12 +68,12 @@ void CNavMeshBuilder::BuildNavMesh(InputGeom* geom)
 
 	if(!heightfield)
 	{
-		std::cout << "ERROR: Out of memory. Could not allocate memory for height field. Cancelling nav mesh generation" << std::endl;
+		std::cout << "ERROR: Out of memory. Could not allocate memory for height field. Cancelling navmesh generation" << std::endl;
 		return;
 	}
 	if(!rcCreateHeightfield(m_rcContext, *heightfield, m_rcConfig.width, m_rcConfig.height, m_rcConfig.bmin, m_rcConfig.bmax, m_rcConfig.cs, m_rcConfig.ch))
 	{
-		std::cout << "ERROR: Could not create solid heightfield. Cancelling nav mesh generation" << std::endl;
+		std::cout << "ERROR: Could not create solid heightfield. Cancelling navmesh generation" << std::endl;
 		//m_rcContext->log(RC_LOG_ERROR, "buildNavigation: Could not create solid heightfield.");
 		return;
 	}
@@ -88,7 +88,7 @@ void CNavMeshBuilder::BuildNavMesh(InputGeom* geom)
 	unsigned char* triareas = new unsigned char[triCount];
 	if(!triareas)
 	{
-		std::cout << "ERROR: Out of memory. Could not allocate memory for tri-areas. Cancelling nav mesh generation" << std::endl;
+		std::cout << "ERROR: Out of memory. Could not allocate memory for tri-areas. Cancelling navmesh generation" << std::endl;
 		//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'm_triareas' (%d).", ntris);
 		return;
 	}
@@ -100,7 +100,7 @@ void CNavMeshBuilder::BuildNavMesh(InputGeom* geom)
 	rcMarkWalkableTriangles(m_rcContext, m_rcConfig.walkableSlopeAngle, verts, vertCount, tris, triCount, triareas); //WALKABLE SLOPE ANGLE IS MISSING
 	if(!rcRasterizeTriangles(m_rcContext, verts, vertCount, tris, triareas, triCount, *heightfield, m_rcConfig.walkableClimb)) //WALKABLE CLIMB IS MISSING
 	{
-		std::cout << "ERROR: Could not rasterize triangles. Cancelling nav mesh generation" << std::endl;
+		std::cout << "ERROR: Could not rasterize triangles. Cancelling navmesh generation" << std::endl;
 		//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not rasterize triangles.");
 		return;
 	}
@@ -134,13 +134,13 @@ void CNavMeshBuilder::BuildNavMesh(InputGeom* geom)
 	rcCompactHeightfield* compactHeightfield = rcAllocCompactHeightfield();
 	if(!compactHeightfield)
 	{
-		std::cout << "ERROR: Out of memory. Could not allocate memory for compact heightfield. Cancelling nav mesh generation" << std::endl;
+		std::cout << "ERROR: Out of memory. Could not allocate memory for compact heightfield. Cancelling navmesh generation" << std::endl;
 		//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'chf'.");
 		return;
 	}
 	if(!rcBuildCompactHeightfield(m_rcContext, m_rcConfig.walkableHeight, m_rcConfig.walkableClimb, *heightfield, *compactHeightfield))
 	{
-		std::cout << "ERROR: Could not create compact heightfield. Cancelling nav mesh generation" << std::endl;
+		std::cout << "ERROR: Could not create compact heightfield. Cancelling navmesh generation" << std::endl;
 		//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build compact data.");
 		return;
 	}
@@ -154,7 +154,7 @@ void CNavMeshBuilder::BuildNavMesh(InputGeom* geom)
 	// Erode the walkable area by agent radius.
 	if(!rcErodeWalkableArea(m_rcContext, m_rcConfig.walkableRadius, *compactHeightfield))
 	{
-		std::cout << "ERROR: Could not erode walkable areas. Cancelling nav mesh generation" << std::endl;
+		std::cout << "ERROR: Could not erode walkable areas. Cancelling navmesh generation" << std::endl;
 		//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not erode.");
 		return;
 	}
@@ -200,7 +200,7 @@ void CNavMeshBuilder::BuildNavMesh(InputGeom* geom)
 			// Prepare for region partitioning, by calculating distance field along the walkable surface.
 			if(!rcBuildDistanceField(m_rcContext, *compactHeightfield))
 			{
-				std::cout << "ERROR: Could not build distance field. Cancelling nav mesh generation" << std::endl;
+				std::cout << "ERROR: Could not build distance field. Cancelling navmesh generation" << std::endl;
 				//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build distance field.");
 				return;
 			}
@@ -211,7 +211,7 @@ void CNavMeshBuilder::BuildNavMesh(InputGeom* geom)
 			// Partition the walkable surface into simple regions without holes.
 			if(!rcBuildRegions(m_rcContext, *compactHeightfield, 0, m_rcConfig.minRegionArea, m_rcConfig.mergeRegionArea))
 			{
-				std::cout << "ERROR: Could not build watershed regions. Cancelling nav mesh generation" << std::endl;
+				std::cout << "ERROR: Could not build watershed regions. Cancelling navmesh generation" << std::endl;
 				//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build watershed regions.");
 				return;
 			}
@@ -227,7 +227,7 @@ void CNavMeshBuilder::BuildNavMesh(InputGeom* geom)
 			// Monotone partitioning does not need distancefield.
 			if(!rcBuildRegionsMonotone(m_rcContext, *compactHeightfield, 0, m_rcConfig.minRegionArea, m_rcConfig.mergeRegionArea))
 			{
-				std::cout << "Could not build monotone regions. Cancelling nav mesh generation" << std::endl;
+				std::cout << "Could not build monotone regions. Cancelling navmesh generation" << std::endl;
 				//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build monotone regions.");
 				return;
 			}
@@ -242,7 +242,7 @@ void CNavMeshBuilder::BuildNavMesh(InputGeom* geom)
 			// Partition the walkable surface into simple regions without holes.
 			if(!rcBuildLayerRegions(m_rcContext, *compactHeightfield, 0, m_rcConfig.minRegionArea))
 			{
-				std::cout << "ERROR: Could not build layer regions. Cancelling nav mesh generation" << std::endl;
+				std::cout << "ERROR: Could not build layer regions. Cancelling navmesh generation" << std::endl;
 				//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build layer regions.");
 				return;
 			}
@@ -252,14 +252,77 @@ void CNavMeshBuilder::BuildNavMesh(InputGeom* geom)
 
 		default:
 			std::cout << partitioningMethod << std::endl;
-			std::cout << "ERROR: Invalid partitioning method. Cancelling nav mesh generation" << std::endl;
+			std::cout << "ERROR: Invalid partitioning method. Cancelling navmesh generation" << std::endl;
 			return;
 	}
 
 	std::cout << "Partitioned compact heightfield..." << std::endl;
+	std::cout << "Creating contours..." << std::endl;
 
 	//
 	// Step 5. Trace and simplify region contours.
 	//
-	//TODO: CONTINUE HERE
+	// Create contours.
+	rcContourSet* contourSet = rcAllocContourSet();
+	if(!contourSet)
+	{
+		std::cout << "ERROR: Out of memory. Could not allocate memory for contour set. Cancelling navmesh generation" << std::endl;
+		//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'cset'.");
+		return;
+	}
+	if(!rcBuildContours(m_rcContext, *compactHeightfield, m_rcConfig.maxSimplificationError, m_rcConfig.maxEdgeLen, *contourSet))
+	{
+		std::cout << "ERROR: Could not create contour set. Cancelling navmesh generation" << std::endl;
+		//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not create contours.");
+		return;
+	}
+
+	std::cout << "Created contours" << std::endl;
+	std::cout << "Building ploygon navmesh from contours" << std::endl;
+
+	//
+	// Step 6. Build polygons mesh from contours.
+	//
+
+	// Build polygon navmesh from the contours.
+	rcPolyMesh* polyMesh = rcAllocPolyMesh();
+	if(!polyMesh)
+	{
+		std::cout << "ERROR: Out of memory. Could not allocate memory for polygon mesh. Cancelling navmesh generation" << std::endl;
+		//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'pmesh'.");
+		return;
+	}
+	if(!rcBuildPolyMesh(m_rcContext, *contourSet, m_rcConfig.maxVertsPerPoly, *polyMesh))
+	{
+		std::cout << "ERROR: could not build polygon mesh. Cancelling navmesh generation" << std::endl;
+		//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not triangulate contours.");
+		return;
+	}
+
+	std::cout << "Built polygon navmesh from contours" << std::endl;
+	std::cout << "Building detail polygon navmesh..." << std::endl;
+
+	//
+	// Step 7. Create detail mesh which allows to access approximate height on each polygon.
+	//
+
+	rcPolyMeshDetail* polyMeshDetail = rcAllocPolyMeshDetail();
+	if(!polyMeshDetail)
+	{
+		std::cout << "ERROR: Out of memory. Could not allocate memory for detail polygon mesh. Cancelling navmesh generation" << std::endl;
+		//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'pmdtl'.");
+		return;
+	}
+
+	if(!rcBuildPolyMeshDetail(m_rcContext, *polyMesh, *compactHeightfield, m_rcConfig.detailSampleDist, m_rcConfig.detailSampleMaxError, *polyMeshDetail))
+	{
+		std::cout << "ERROR: could not build detail polygon mesh. Cancelling navmesh generation" << std::endl;
+		//m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build detail mesh.");
+		return;
+	}
+
+	rcFreeCompactHeightfield(compactHeightfield);
+	compactHeightfield = nullptr;
+	rcFreeContourSet(contourSet);
+	contourSet = nullptr;
 }
