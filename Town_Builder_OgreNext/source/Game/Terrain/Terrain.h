@@ -20,11 +20,12 @@
 #include "Engine/Event.h"
 #include "AI/Recast/Helpers/RecastInputGeom.h"
 #include "Erosion.h"
+#include "NewErosion.h"
 
 #define TERRAIN_FILE_PREFIX String("testTerrain")
 #define TERRAIN_FILE_SUFFIX String("dat")
 #define TERRAIN_WORLD_SIZE 12000.0f
-#define TERRAIN_SIZE 2049
+#define TERRAIN_SIZE 513
 
 using namespace Ogre;
 
@@ -83,12 +84,17 @@ private:
 	Vector3 mTerrainPos;
 	bool	mTerrainsImported = false;
 	Real	mCycle			  = 1024;
-	Real	mHeightScale	  = 1.0f;
+	Real	mHeightScale	  = 2.0f;
 	Vector2 mOriginPoint	  = { 0, 0 };
 
-	float	mFrequency = 0.5f;
+	float	mFrequency = 1.0f;
 	float   mPowerFactor = 2.0f;
-	int		mOctaves = 8;
+	int		mOctaves = 5;
+
+	// erosion
+	Erosion* mNewErosion = nullptr;
+	int      mErosionIterations = 10;
+
 
 	std::string	mSeed = "";
 	bool mIsUpdated = false;

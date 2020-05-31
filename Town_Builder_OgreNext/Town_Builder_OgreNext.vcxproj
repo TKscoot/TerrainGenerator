@@ -69,6 +69,7 @@
     <ClInclude Include="source\Engine\InputManager.h" />
     <ClInclude Include="source\Game\Terrain\Erosion.h" />
     <ClInclude Include="source\Game\Terrain\ModelPlacer.h" />
+    <ClInclude Include="source\Game\Terrain\NewErosion.h" />
     <ClInclude Include="source\PagedGeometry\BatchedGeometry.h" />
     <ClInclude Include="source\PagedGeometry\BatchPage.h" />
     <ClInclude Include="source\PagedGeometry\GrassLoader.h" />
@@ -164,6 +165,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(ProjectDir)\source;%OGRE_SDK%\include\OGRE\RTShaderSystem;%OGRE_SDK%\include\OGRE\Overlay;%OGRE_SDK%\include\OGRE\Bites;%OGRE_SDK%\include\OGRE;$(ProjectDir)\source\AI\Recast\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -75,6 +75,7 @@ public:
 					dirX /= len;
 					dirY /= len;
 				}
+
 				posX += dirX;
 				posY += dirY;
 
@@ -154,7 +155,7 @@ public:
 		// Calculate height with bilinear interpolation of the heights of the nodes of the cell
 		float height = heightNW * (1 - x) * (1 - y) + heightNE * x * (1 - y) + heightSW * (1 - x) * y + heightSE * x * y;
 
-		HeightAndGradient hag { height = height, gradientX = gradientX, gradientY = gradientY };
+		HeightAndGradient hag { height, gradientX, gradientY };
 
 		return hag;
 	}

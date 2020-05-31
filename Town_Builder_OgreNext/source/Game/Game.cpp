@@ -161,6 +161,8 @@ void CGame::Setup()
 	mModelPlacer = new CModelPlacer(sceneManager, mTerrain);
 	mPlantPlacer = new CPlantPlacer(sceneManager, mTerrain);
 	mPlantPlacer->Initialize();
+
+	Sleep(1000);
 }
 
 bool CGame::Update(const FrameEvent &evt)

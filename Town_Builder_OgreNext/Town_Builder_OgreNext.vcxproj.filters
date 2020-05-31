@@ -206,5 +206,8 @@
     <ClInclude Include="NavMeshBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\Game\Terrain\NewErosion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

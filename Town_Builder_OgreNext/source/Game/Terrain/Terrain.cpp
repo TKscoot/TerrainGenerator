@@ -25,6 +25,7 @@ void CTerrain::Initialize(PSSMShadowCameraSetup* pssmSetup)
 	CreateTerrain();
 
 	CEvent::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CTerrain::Update, this, std::placeholders::_1));
+	mNewErosion = new Erosion(mTerrainGroup->getTerrainSize());
 
 	mInputGeom = new InputGeom(mTerrainGroup);
 	mInputGeom->getVerts();
@@ -51,12 +52,50 @@ bool CTerrain::Update(const FrameEvent& evt)
 	{
 		UpdateTerrainHeight(0, 0);
 	}
+
+	ImGui::Spacing();
+	ImGui::SliderInt("Iterations", &mErosionIterations, 1, 20000);
 	if (ImGui::Button("Erode!"))
 	{
 		std::cout << "Began erosion" << std::endl;
 
+		srand(time(NULL));
+		const uint16 terrainSize = mTerrainGroup->getTerrainSize();
+
 		float* map = mTerrain->getHeightData();
-		mErosion->Erode(map, mTerrain->getSize(), 100);
+		std::vector<float>vMap(map, map + (terrainSize * terrainSize));
+
+
+		float minValue = std::numeric_limits<float>::max();
+		float maxValue = std::numeric_limits<float>::min();
+
+		for (int i = 0; i < vMap.size(); i++)
+		{
+			minValue = std::min(vMap[i], minValue);
+			maxValue = std::max(vMap[i], maxValue);
+		}
+
+
+		for (int i = 0; i < vMap.size(); i++)
+		{
+			vMap[i] = (vMap[i] - minValue) / (maxValue - minValue);
+		}
+
+		for (int i = 0; i < mErosionIterations; i++)
+		{
+			mNewErosion->Calculate(vMap);
+		}
+
+		for (uint16 i = 0; i < terrainSize; i++)
+		{
+			for (uint16 j = 0; j < terrainSize; j++)
+			{
+				int it = i * terrainSize + j;
+
+				map[it] = (vMap[it] + minValue) * (maxValue + minValue);
+			}
+		}
+
 		mTerrain->dirty();
 		mTerrain->update();
 
