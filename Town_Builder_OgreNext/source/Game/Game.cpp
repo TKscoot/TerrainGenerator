@@ -10,6 +10,23 @@ CGame::CGame() : ApplicationContext("Town Builder")
 
 CGame::~CGame()
 {
+	delete mModelPlacer;
+	mModelPlacer = nullptr;
+	delete mPlantPlacer;
+	mPlantPlacer = nullptr;
+
+	delete mTerrain;
+	mTerrain = nullptr;
+
+	delete mPssmSetup;
+	mPssmSetup = nullptr;
+
+	delete mCamera;
+	mCamera = nullptr;
+
+	mInputMgr->destroy();
+	delete mInputMgr;
+	mInputMgr = nullptr;
 }
 
 void CGame::Setup()
@@ -38,13 +55,13 @@ void CGame::Setup()
 	sceneManager->addRenderQueueListener(getOverlaySystem());
 
 	// Add Frame events using methods or lambdas
-	CEvent::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CGame::Update, this, std::placeholders::_1));
-	CEvent::GetSingletonPtr()->AddFrameEndedCallback([](const FrameEvent& evt) -> bool 
+	CEventHandler::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CGame::Update, this, std::placeholders::_1));
+	CEventHandler::GetSingletonPtr()->AddFrameEndedCallback([](const FrameEvent& evt) -> bool 
 	{
 		ImGui::EndFrame();
 		return true;
 	});
-	CEvent::GetSingletonPtr()->AddFrameRenderingQueuedCallback([&cam = mCamera](const FrameEvent& evt) -> bool
+	CEventHandler::GetSingletonPtr()->AddFrameRenderingQueuedCallback([&cam = mCamera](const FrameEvent& evt) -> bool
 	{
 		cam->FrameRenderingQueued(evt);
 		return true;
@@ -99,22 +116,23 @@ void CGame::Setup()
 	// shadow camera setup
 	Ogre::PSSMShadowCameraSetup* pssmSetup = new Ogre::PSSMShadowCameraSetup();
 	if (mPssmSetup)
-		delete mPssmSetup;
+	delete mPssmSetup;
 	mPssmSetup = pssmSetup;
-
+	
 	mPssmSetup->calculateSplitPoints(3, 0.1, sceneManager->getShadowFarDistance());    // Calculate 3 split points (PSSM 3)
-			// Increase near distance when experiencing artifacts
+	
+	// Increase near distance when experiencing artifacts
 	mPssmSetup->setSplitPadding(0.1);
 	mPssmSetup->setOptimalAdjustFactor(0, 2);
 	mPssmSetup->setOptimalAdjustFactor(1, 1);
 	mPssmSetup->setOptimalAdjustFactor(2, 0.5);
-
+	
 	sceneManager->setShadowCameraSetup(Ogre::ShadowCameraSetupPtr(mPssmSetup));
-
+	
 	
 	// Load and apply Skybox
 	sceneManager->setSkyBox(true, "Examples/CloudyNoonSkyBox", 50000, true);
-
+	
 	// Create Light
 	Light* light1 = sceneManager->createLight("Light1");
 	light1->setType(Ogre::Light::LT_POINT);
@@ -124,7 +142,7 @@ void CGame::Setup()
 	light1->setSpecularColour(1.0f, 0.0f, 0.0f);
 	// Set Light (Range, Brightness, Fade Speed, Rapid Fade Speed)
 	light1->setAttenuation(10, 0.5, 0.045, 0.0);
-
+	
 	// Create light Entity
 	Entity* lightEnt = sceneManager->createEntity("LightEntity", "sphere.mesh");
 	SceneNode* lightNode = sceneManager->createSceneNode("LightNode");
@@ -134,7 +152,7 @@ void CGame::Setup()
 	lightNode->setPosition(0, 4, 10);
 	
 	sceneManager->getRootSceneNode()->addChild(lightNode);
-
+	
 	// Create an instance of our model and add it to the scene
 	//Entity* ent = sceneManager->createEntity("house.mesh");
 	//SceneNode* entNode = sceneManager->createSceneNode("Character");
@@ -143,8 +161,8 @@ void CGame::Setup()
 	//entNode->setPosition(100, 1000, -450);
 	//entNode->scale(Vector3(20, 20, 20));
 	//entNode->showBoundingBox(true);
-
-
+	
+	
 	// Create an instance of the ImGui overlay and add it to the OverlayManager
 	ImGuiOverlay *imguiOverlay = new ImGuiOverlay();
 	imguiOverlay->setZOrder(300);
@@ -152,16 +170,16 @@ void CGame::Setup()
 	Ogre::OverlayManager::getSingleton().addOverlay(imguiOverlay); // now owned by overlaymgr
 	mImguiListener.reset(new ImGuiInputListener());
 	addInputListener(mImguiListener.get());
-	mListenerChain = InputListenerChain({ mImguiListener.get()});
-
+	mListenerChain = InputListenerChain({ mImguiListener.get() });
+	
 	mTerrain = new CTerrain(sceneManager);
 	mTerrain->Initialize(mPssmSetup);
-
+	
 	// Creating Model & Plant placing Instances
 	mModelPlacer = new CModelPlacer(sceneManager, mTerrain);
 	mPlantPlacer = new CPlantPlacer(sceneManager, mTerrain);
 	mPlantPlacer->Initialize();
-
+	
 	Sleep(1000);
 }
 
@@ -177,7 +195,6 @@ bool CGame::Update(const FrameEvent &evt)
 	WindowEventUtilities::messagePump();
 
 	ImGuiOverlay::NewFrame(evt);
-	ImGui::ShowDemoWindow();
 
 	// Debug Gui for FPS and Geometry stats
 	RenderTarget::FrameStats stats = mWindow->getStatistics();
@@ -185,15 +202,19 @@ bool CGame::Update(const FrameEvent &evt)
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
 	ImGui::SetNextWindowSize(ImVec2(400, mWindow->getHeight()));
 	ImGui::Begin("", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-	ImGui::BeginChild("Stats", ImVec2(0, 90), true);
-	ImGui::Text("FPS: %.2f (Avg: %.2f) -- MaxFPS: %.2f", stats.lastFPS, stats.avgFPS, stats.bestFPS);
-	ImGui::Text("Triangle count: %d", stats.triangleCount);
-	ImGui::Text("Batch count: %d", stats.batchCount);
-	if (ImGui::Button("Exit!"))
+	if (ImGui::CollapsingHeader("Statistics", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		exit(0);
+		ImGui::BeginChild("Stats", ImVec2(0, 90), true);
+		ImGui::Text("FPS: %.2f (Avg: %.2f) -- MaxFPS: %.2f", stats.lastFPS, stats.avgFPS, stats.bestFPS);
+		ImGui::Text("Triangle count: %d", stats.triangleCount);
+		ImGui::Text("Batch count: %d", stats.batchCount);
+		if (ImGui::Button("Exit!"))
+		{
+			exit(0);
+		}
+		ImGui::EndChild();
 	}
-	ImGui::EndChild();
+	ImGui::Spacing();
 	return true;
 }
 

@@ -15,39 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\PagedGeometry\BatchedGeometry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\PagedGeometry\BatchPage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\PagedGeometry\GrassLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\PagedGeometry\ImpostorPage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\PagedGeometry\PagedGeometry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\PagedGeometry\PropertyMaps.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\PagedGeometry\StaticBillboardSet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\PagedGeometry\TreeLoader2D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\PagedGeometry\TreeLoader3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\PagedGeometry\WindBatchedGeometry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\PagedGeometry\WindBatchPage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -117,44 +84,11 @@
     <ClCompile Include="NavMeshBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Game\Terrain\HydraulicErosion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\PagedGeometry\BatchedGeometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PagedGeometry\BatchPage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PagedGeometry\GrassLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PagedGeometry\ImpostorPage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PagedGeometry\PagedGeometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PagedGeometry\PropertyMaps.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PagedGeometry\RandomTable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PagedGeometry\StaticBillboardSet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PagedGeometry\TreeLoader2D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PagedGeometry\TreeLoader3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PagedGeometry\WindBatchedGeometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PagedGeometry\WindBatchPage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\Game\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -200,13 +134,10 @@
     <ClInclude Include="source\AI\AIAgent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Game\Terrain\Erosion.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="NavMeshBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Game\Terrain\NewErosion.h">
+    <ClInclude Include="source\Game\Terrain\HydraulicErosion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

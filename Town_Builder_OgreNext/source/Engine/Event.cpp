@@ -1,8 +1,8 @@
 #include "Event.h"
 
-CEvent* CEvent::mInstance = nullptr;
+CEventHandler* CEventHandler::mInstance = nullptr;
 
-bool CEvent::frameStarted(const FrameEvent & evt)
+bool CEventHandler::frameStarted(const FrameEvent & evt)
 {
 	for (auto &cb : mFrameStartedCallbacks)
 	{
@@ -12,7 +12,7 @@ bool CEvent::frameStarted(const FrameEvent & evt)
 	return true;
 }
 
-bool CEvent::frameEnded(const FrameEvent & evt)
+bool CEventHandler::frameEnded(const FrameEvent & evt)
 {
 	for (auto &cb : mFrameEndedCallbacks)
 	{
@@ -22,7 +22,7 @@ bool CEvent::frameEnded(const FrameEvent & evt)
 	return true;
 }
 
-bool CEvent::frameRenderingQueued(const FrameEvent & evt)
+bool CEventHandler::frameRenderingQueued(const FrameEvent & evt)
 {
 	for (auto &cb : mFrameRenderingQueuedCallbacks)
 	{

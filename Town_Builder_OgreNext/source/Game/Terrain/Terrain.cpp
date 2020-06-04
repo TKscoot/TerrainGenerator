@@ -1,12 +1,27 @@
 #include "Terrain.h"
 
 
+CTerrain::~CTerrain()
+{
+	delete mInputGeom;
+	mInputGeom = nullptr;
+
+	delete mErosion;
+	mErosion = nullptr;
+
+	delete mTerrainGroup;
+	mTerrainGroup = nullptr;
+
+	delete mTerrainGlobals;
+	mTerrainGlobals = nullptr;
+}
+
 void CTerrain::Initialize(PSSMShadowCameraSetup* pssmSetup)
 {
 	mPssmSetup = pssmSetup;
 
 	mTerrainGlobals = new Ogre::TerrainGlobalOptions();
-	mTerrainGroup = new Ogre::TerrainGroup(mSceneManager, Ogre::Terrain::ALIGN_X_Z, TERRAIN_SIZE, TERRAIN_WORLD_SIZE);
+	mTerrainGroup   = new Ogre::TerrainGroup(mSceneManager, Ogre::Terrain::ALIGN_X_Z, TERRAIN_SIZE, TERRAIN_WORLD_SIZE);
 	mTerrainGroup->setFilenameConvention(TERRAIN_FILE_PREFIX, TERRAIN_FILE_SUFFIX);
 	mTerrainGroup->setOrigin(mTerrainPos);
 
@@ -18,14 +33,14 @@ void CTerrain::Initialize(PSSMShadowCameraSetup* pssmSetup)
 	ln->setDirection(Vector3(0.55, -0.8, 0.75).normalisedCopy());
 	ln->attachObject(l);
 
-	mErosion = new CErosion();
 
 	ConfigureTerrainDefaults();
 
 	CreateTerrain();
 
-	CEvent::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CTerrain::Update, this, std::placeholders::_1));
-	mNewErosion = new Erosion(mTerrainGroup->getTerrainSize());
+	CEventHandler::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CTerrain::Update, this, std::placeholders::_1));
+	std::function<void(int)> erodeFunction = std::bind(&CTerrain::Erode, this, std::placeholders::_1);
+	mErosion = new CHydraulicErosion(mTerrainGroup->getTerrainSize(), erodeFunction);
 
 	mInputGeom = new InputGeom(mTerrainGroup);
 	mInputGeom->getVerts();
@@ -37,73 +52,79 @@ bool CTerrain::Update(const FrameEvent& evt)
 	std::ostringstream ss;
 	const char* str0 = mSeed.c_str();
 	char* str = const_cast<char*>(str0);
-	ImGui::BeginChild("Terrain", ImVec2(0, 180), true);
-	if (ImGui::InputText("Seed", str, IM_ARRAYSIZE(str)))
+	char str1[255];
+	//str1 = const_cast<char*>(str0);
+	memcpy(str1, str0, IM_ARRAYSIZE(str1));
+
+
+	if (ImGui::CollapsingHeader("Terrain", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ss << str0;
-		mSeed = ss.str();
+		ImGui::BeginChild("Terrain", ImVec2(0, 155), true);
+		if (ImGui::InputText("Seed", str1, IM_ARRAYSIZE(str1)))
+		{
+			ss << str1;
+			mSeed = ss.str();
+		}
+		ImGui::SliderInt  ("Octaves",      &mOctaves,     1,     15);
+		ImGui::SliderFloat("Frequency",	   &mFrequency,   0.05f, 5.0f);
+		ImGui::SliderFloat("Height Scale", &mHeightScale, 0.05f, 2.5f);
+		ImGui::SliderFloat("Power factor", &mPowerFactor, 0.1f,  3.0f);
+		ImGui::Spacing();
+		if (ImGui::Button("Generate!"))
+		{
+			UpdateTerrainHeight(0, 0);
+		}
+		ImGui::EndChild();
 	}
-	ImGui::SliderInt  ("Octaves",      &mOctaves,     1,     15);
-	ImGui::SliderFloat("Frequency",	   &mFrequency,   0.05f, 5.0f);
-	ImGui::SliderFloat("Height Scale", &mHeightScale, 0.05f, 2.5f);
-	ImGui::SliderFloat("Power factor", &mPowerFactor, 0.1f,  3.0f);
 	ImGui::Spacing();
-	if (ImGui::Button("Generate!"))
-	{
-		UpdateTerrainHeight(0, 0);
-	}
-
-	ImGui::Spacing();
-	ImGui::SliderInt("Iterations", &mErosionIterations, 1, 20000);
-	if (ImGui::Button("Erode!"))
-	{
-		std::cout << "Began erosion" << std::endl;
-
-		srand(time(NULL));
-		const uint16 terrainSize = mTerrainGroup->getTerrainSize();
-
-		float* map = mTerrain->getHeightData();
-		std::vector<float>vMap(map, map + (terrainSize * terrainSize));
-
-
-		float minValue = std::numeric_limits<float>::max();
-		float maxValue = std::numeric_limits<float>::min();
-
-		for (int i = 0; i < vMap.size(); i++)
-		{
-			minValue = std::min(vMap[i], minValue);
-			maxValue = std::max(vMap[i], maxValue);
-		}
-
-
-		for (int i = 0; i < vMap.size(); i++)
-		{
-			vMap[i] = (vMap[i] - minValue) / (maxValue - minValue);
-		}
-
-		for (int i = 0; i < mErosionIterations; i++)
-		{
-			mNewErosion->Calculate(vMap);
-		}
-
-		for (uint16 i = 0; i < terrainSize; i++)
-		{
-			for (uint16 j = 0; j < terrainSize; j++)
-			{
-				int it = i * terrainSize + j;
-
-				map[it] = (vMap[it] + minValue) * (maxValue + minValue);
-			}
-		}
-
-		mTerrain->dirty();
-		mTerrain->update();
-
-		std::cout << "Ended erosion" << std::endl;
-	}
-	ImGui::EndChild();
-	ImGui::End();
 	return true;
+}
+
+void CTerrain::Erode(int iterations)
+{
+	std::cout << "Began erosion" << std::endl;
+
+	srand(time(NULL));
+	const uint16 terrainSize = mTerrainGroup->getTerrainSize();
+
+	float* map = mTerrain->getHeightData();
+	std::vector<float>vMap(map, map + (terrainSize * terrainSize));
+
+
+	float minValue = std::numeric_limits<float>::max();
+	float maxValue = std::numeric_limits<float>::min();
+
+	for (int i = 0; i < vMap.size(); i++)
+	{
+		minValue = std::min(vMap[i], minValue);
+		maxValue = std::max(vMap[i], maxValue);
+	}
+
+
+	for (int i = 0; i < vMap.size(); i++)
+	{
+		vMap[i] = (vMap[i] - minValue) / (maxValue - minValue);
+	}
+
+	for (int i = 0; i < iterations; i++)
+	{
+		mErosion->Calculate(vMap);
+	}
+
+	for (uint16 i = 0; i < terrainSize; i++)
+	{
+		for (uint16 j = 0; j < terrainSize; j++)
+		{
+			int it = i * terrainSize + j;
+
+			map[it] = (vMap[it] + minValue) * (maxValue + minValue);
+		}
+	}
+
+	mTerrain->dirty();
+	mTerrain->update();
+
+	std::cout << "Ended erosion" << std::endl;
 }
 
 void CTerrain::ConfigureTerrainDefaults(/*Light * l*/)
@@ -197,36 +218,12 @@ void CTerrain::DefineTerrain(long x, long y)
 		}
 	}
 
-	std::cout << "Began erosion" << std::endl;
-	////for (int i = 0; i < 100; i++)
-	////{
-	//	mErosion->Erode(heightMap, terrainSize, 100);
-	////}
-	std::cout << "Ended erosion" << std::endl;
-
 	mTerrainGroup->defineTerrain(x, y, heightMap);
 }
 
 void CTerrain::UpdateTerrainHeight(long x, long y)
 {
-	mIsUpdated = false;
-
-	// TODO: Wrap into function. UpdateSeed() or whatever
-	// {
-	if (mSeed.empty())
-	{
-		srand(time(NULL));
-	}
-	else
-	{
-		std::hash<std::string> hashFunc;
-		int32_t seedHash = hashFunc(mSeed);
-		srand(seedHash);
-	}
-
-	int simplexSeed = rand() % 50000;
-	SimplexNoise::createPermutations(simplexSeed);
-	// }
+	UpdateSeed();
 
 	const uint16 terrainSize = mTerrainGroup->getTerrainSize();
 	float* heightMap = OGRE_ALLOC_T(float, terrainSize*terrainSize, MEMCATEGORY_GEOMETRY);
@@ -267,8 +264,6 @@ void CTerrain::UpdateTerrainHeight(long x, long y)
 	mTerrainGroup->update();
 
 	InitBlendMaps(mTerrain);
-
-	mIsUpdated = true;
 }
 
 void CTerrain::GetTerrainImage(bool flipX, bool flipY, Image& img)
@@ -316,24 +311,7 @@ void CTerrain::InitBlendMaps(Terrain* terrain)
 
 void CTerrain::CreateTerrain()
 {
-	mIsUpdated = false;
-
-	// TODO: Wrap into function. UpdateSeed() or whatever
-	// {
-	if (mSeed.empty())
-	{
-		srand(time(NULL));
-	}
-	else
-	{
-		std::hash<std::string> hashFunc;
-		int32_t seedHash = hashFunc(mSeed);
-		srand(seedHash);
-	}
-
-	int simplexSeed = rand() % 50000;
-	SimplexNoise::createPermutations(simplexSeed);
-	// }
+	UpdateSeed();
 
 	for (long x = TERRAIN_PAGE_MIN_X; x <= TERRAIN_PAGE_MAX_X; ++x)
 	{
@@ -344,6 +322,7 @@ void CTerrain::CreateTerrain()
 		}
 
 	}
+
 	// sync load since we want everything in place when we start
 	//mTerrainGroup->updateGeometry();
 	mTerrainGroup->loadAllTerrains(true);
@@ -357,13 +336,27 @@ void CTerrain::CreateTerrain()
 		InitBlendMaps(t);
 	}
 
-	mIsUpdated = true;
+}
+
+void CTerrain::UpdateSeed()
+{
+	if (mSeed.empty())
+	{
+		srand(time(NULL));
+	}
+	else
+	{
+		std::hash<std::string> hashFunc;
+		int32_t seedHash = hashFunc(mSeed);
+		srand(seedHash);
+	}
+
+	int simplexSeed = rand() % 50000;
+	SimplexNoise::createPermutations(simplexSeed);
 }
 
 void CTerrain::FlattenTerrainUnderObject(SceneNode * sn)
 {
-	mIsUpdated = false;
-
 	//SceneNode* character = mSceneManager->getSceneNode("Character");
 	AxisAlignedBox aabb = sn->_getWorldAABB();
 
@@ -406,6 +399,4 @@ void CTerrain::FlattenTerrainUnderObject(SceneNode * sn)
 
 	}
 	mTerrain->update();
-
-	mIsUpdated = true;
 }

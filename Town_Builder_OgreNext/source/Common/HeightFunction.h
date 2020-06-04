@@ -3,7 +3,7 @@
 
 namespace HeightFunction
 {
-	Ogre::TerrainGroup* terrain = NULL;
+	Ogre::TerrainGroup* terrain = nullptr;
 
 	//Initializes the height function. Call this before calling getTerrainHeight()
 	void initialize(Ogre::TerrainGroup* terrainGroup)
@@ -17,7 +17,7 @@ namespace HeightFunction
 	//Gets the height of the terrain at the specified x/z coordinate
 	//The userData parameter isn't used in this implementation of a height function, since
 	//there's no need for extra data other than the x/z coordinates.
-	inline float getTerrainHeight(const float x, const float z, void *userData = NULL)
+	inline float getTerrainHeight(const float x, const float z, void *userData = nullptr)
 	{
 		return terrain->getHeightAtWorldPosition(x, 0, z);
 	}

@@ -6,19 +6,25 @@
 
 using namespace Ogre;
 
-class CEvent : public FrameListener
+class CEventHandler : public FrameListener
 {
 public:
-	CEvent()
+	CEventHandler()
 	{
 		Root::getSingleton().addFrameListener(this);
 	}
 
-	static CEvent* GetSingletonPtr()
+	void Destroy()
+	{
+		delete mInstance;
+		mInstance = nullptr;
+	}
+
+	static CEventHandler* GetSingletonPtr()
 	{
 		if (mInstance == nullptr)
 		{
-			mInstance = new CEvent();
+			mInstance = new CEventHandler();
 		}
 
 		return mInstance;
@@ -71,6 +77,6 @@ private:
 	std::vector<std::function<bool(const FrameEvent&)>> mFrameEndedCallbacks;
 	std::vector<std::function<bool(const FrameEvent&)>> mFrameRenderingQueuedCallbacks;
 
-	static CEvent* mInstance;
+	static CEventHandler* mInstance;
 
 };

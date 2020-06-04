@@ -12,6 +12,7 @@ public:
 	virtual ~InputManager(void);
 
 	void initialise(Ogre::RenderWindow *renderWindow);
+	void destroy();
 	void frameRendered(	  const Ogre::FrameEvent& evt) {}
 	bool keyPressed(	  const KeyboardEvent& evt) 
 	{ 

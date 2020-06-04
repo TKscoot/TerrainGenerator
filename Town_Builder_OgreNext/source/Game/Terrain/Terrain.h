@@ -8,19 +8,20 @@
 //#include "Game.h"
 #include <ctime>
 #include <iostream>
+
 #include "Ogre.h"
+#include "OgreImGuiOverlay.h"
+#include "imgui.h"
 #include "Terrain/OgreTerrainMaterialGeneratorA.h"
 #include "Terrain/OgreTerrain.h"
 #include "Terrain/OgreTerrainGroup.h"
-#include "OgreImGuiOverlay.h"
+
 #include "Common/SimplexNoise.h"
 #include "Common/Helpers.h"
 #include "Engine/InputManager.h"
-#include "imgui.h"
 #include "Engine/Event.h"
 #include "AI/Recast/Helpers/RecastInputGeom.h"
-#include "Erosion.h"
-#include "NewErosion.h"
+#include "HydraulicErosion.h"
 
 #define TERRAIN_FILE_PREFIX String("testTerrain")
 #define TERRAIN_FILE_SUFFIX String("dat")
@@ -33,10 +34,14 @@ class CTerrain
 {
 public:
 	CTerrain(SceneManager* scnMgr) : mSceneManager(scnMgr) {}
+	~CTerrain();
+
 	void Initialize(PSSMShadowCameraSetup* pssmSetup);
 	bool Update(const FrameEvent& evt);
 	void CreateTerrain();
 	
+	void UpdateSeed();
+
 	void FlattenTerrainUnderObject(SceneNode* sn);
 
 	// Getter & Setter
@@ -50,8 +55,9 @@ public:
 		return mTerrain->getGlobalColourMap(); 
 	}
 
-	bool IsUpdated() { return mIsUpdated; }
 	InputGeom* GetInputGeom() { return mInputGeom; }
+
+	void Erode(int iterations);
 
 private:
 	// Methods
@@ -67,7 +73,6 @@ private:
 	{
 		Vector3 corner = Vector3();
 		Vector3 terrainPosition;
-
 	};
 
 	// Vars
@@ -79,23 +84,22 @@ private:
 	TerrainGroup*		  mTerrainGroup;
 	Terrain*			  mTerrain;
 	InputGeom*			  mInputGeom;
-	CErosion*             mErosion;
 
-	Vector3 mTerrainPos;
+	Vector3 mTerrainPos		  = Vector3::ZERO;
 	bool	mTerrainsImported = false;
 	Real	mCycle			  = 1024;
 	Real	mHeightScale	  = 2.0f;
 	Vector2 mOriginPoint	  = { 0, 0 };
 
-	float	mFrequency = 1.0f;
+	float	mFrequency   = 1.0f;
 	float   mPowerFactor = 2.0f;
-	int		mOctaves = 5;
+	int		mOctaves     = 5;
 
 	// erosion
-	Erosion* mNewErosion = nullptr;
-	int      mErosionIterations = 10;
+	CHydraulicErosion* mErosion = nullptr;
+
+	int	mErosionIterations = 10;
 
 
 	std::string	mSeed = "";
-	bool mIsUpdated = false;
 };

@@ -21,14 +21,18 @@ void CCamera::Initialize(SceneManager* sceneManager, RenderWindow* window)
 		Real(viewport->getActualHeight()));
 
 	// Add Update Callback
-	CEvent::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CCamera::Update, this, std::placeholders::_1));
+	CEventHandler::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CCamera::Update, this, std::placeholders::_1));
 }
 
 bool CCamera::Update(const FrameEvent& evt)
 {
-	ImGui::BeginChild("Camera", ImVec2(0, 35), true);
-	ImGui::Checkbox("Freelook camera", &mFreeLook);
-	ImGui::EndChild();
+	if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::BeginChild("Camera", ImVec2(0, 35), true);
+		ImGui::Checkbox("Freelook camera", &mFreeLook);
+		ImGui::EndChild();
+	}
+	ImGui::Spacing();
 
 	if (!mFreeLook)
 	{

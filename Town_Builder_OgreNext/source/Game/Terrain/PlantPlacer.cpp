@@ -16,6 +16,10 @@ void CPlantPlacer::Update()
 	//mGrassPG->update();
 }
 
+
+//NEEDS REFACTORING!!
+
+/*
 void CPlantPlacer::PlaceTrees()
 {
 	mEntity = mSceneManager->createEntity("Tree", "tree2.mesh");
@@ -80,58 +84,6 @@ void CPlantPlacer::PlaceTrees()
 		}
 
 	}
-
-
-
-
-	//CreateGrassMesh();
-	//Entity* grass = mSceneManager->createEntity("Grass", "grass");
-
-
-	//StaticGeometry* sg = mSceneManager->createStaticGeometry("Field");
-	//for (int x = bounds.left; x < bounds.right; x += Math::RangeRandom(10, 50))
-	//{
-	//	for (int z = bounds.left; z < bounds.right; z += Math::RangeRandom(10, 50))
-	//	{
-	//		Vector3 pos(x + Math::RangeRandom(-7, 7), 0, z + Math::RangeRandom(-10, 10));
-	//		pos.y = mTerrain->getTerrainGroup()->getHeightAtWorldPosition(pos);
-	//
-	//		if (pos.y > 5 && pos.y < 200)
-	//		{
-	//		
-	//			Quaternion ori(Degree(Math::RangeRandom(0, 359)), Vector3::UNIT_Y);
-	//			float randScale = Math::RangeRandom(2.85, 4.15);
-	//			Vector3 scale(randScale, randScale, randScale);
-	//
-	//			sg->addEntity(mEntity, pos, ori, scale);
-	//		}
-	//	}
-	//}
-
-
-	//for (int x = bounds.left; x < bounds.right; x += Math::RangeRandom(10, 50))
-	//{
-	//	for (int z = bounds.left; z < bounds.right; z += Math::RangeRandom(10, 50))
-	//	{
-	//		Vector3 pos(x + Math::RangeRandom(-40, 40), 0, z + Math::RangeRandom(-40, 40));
-	//		pos.y = mTerrain->getTerrainGroup()->getHeightAtWorldPosition(pos);
-	//
-	//		if (pos.y > 5 && pos.y < 200)
-	//		{
-	//
-	//			Quaternion ori(Degree(Math::RangeRandom(0, 359)), Vector3::UNIT_Y);
-	//			float randScale = Math::RangeRandom(0.85, 1.15);
-	//			Vector3 scale(randScale, randScale, randScale);
-	//
-	//			sg->addEntity(grass, pos, ori, scale);
-	//		}
-	//	}
-	//}
-
-	//sg->build();
-
-
-	
 }
 
 void CPlantPlacer::PlaceGrass()
@@ -246,3 +198,4 @@ void CPlantPlacer::CreateGrassMesh()
 
 	sm->indexData->indexBuffer->unlock();  // commit index changes
 }
+*/

@@ -200,7 +200,7 @@ public:
 							{
 								float weight = 1 - sqrt(sqrDst) / radius;
 								weightSum += weight;
-								weights[addIndex] = weight;
+								weights[addIndex]  = weight;
 								xOffsets[addIndex] = x;
 								yOffsets[addIndex] = y;
 								addIndex++;
