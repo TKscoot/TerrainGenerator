@@ -51,8 +51,6 @@ bool CHydraulicErosion::Update(const FrameEvent & evt)
 	}
 	ImGui::Spacing();
 
-	ImGui::End();
-
 	return true;
 }
 

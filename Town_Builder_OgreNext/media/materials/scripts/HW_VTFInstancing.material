@@ -479,13 +479,20 @@ material Examples/Instancing/VTF/HW/shadow_caster_dq_two_weights
 
 abstract material Examples/Instancing/HW_VTF
 {
+    transparency_casts_shadows on
+    receive_shadows on
 	technique
 	{
 		shadow_caster_material Examples/Instancing/VTF/HW/shadow_caster
 
 		pass
 		{
-			specular	1 1 1 1 12.5
+			alpha_rejection greater 150
+			scene_blend alpha_blend
+
+		    cull_hardware none
+            cull_software none
+
 			vertex_program_ref Ogre/Instancing/HW_VTF_vs
 			{
 			}
@@ -496,6 +503,7 @@ abstract material Examples/Instancing/HW_VTF
 
 			texture_unit Diffuse
 			{
+				tex_address_mode clamp
 				texture		$DiffuseMap
 			}
 
@@ -518,6 +526,11 @@ abstract material Examples/Instancing/HW_VTF
 material Examples/Instancing/VTF/HW/Robot : Examples/Instancing/HW_VTF
 {
 	set	$DiffuseMap	r2skin.jpg
+}
+
+material Examples/Instancing/VTF/HW/Grass : Examples/Instancing/HW_VTF
+{
+	set	$DiffuseMap	gras_02.png
 }
 
 abstract material Examples/Instancing/HW_VTF_dq

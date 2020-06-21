@@ -89,13 +89,16 @@ void CGame::Setup()
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures/skyboxes/sunnytropic", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures/house", "FileSystem");
+	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures/GreenTree", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/scripts", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures/nvidia", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/skyboxes/sunnytropic", "FileSystem");
+	ResourceGroupManager::getSingleton().addResourceLocation("media/trees", "FileSystem");
+	ResourceGroupManager::getSingleton().addResourceLocation("media/trees2", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/imgui/resources", "FileSystem", Ogre::ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME);
 
 	ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-
+	
 
 	MaterialPtr casterMat = MaterialManager::getSingletonPtr()->getByName("Ogre/shadow/depth/caster");
 
@@ -154,8 +157,8 @@ void CGame::Setup()
 	sceneManager->getRootSceneNode()->addChild(lightNode);
 	
 	// Create an instance of our model and add it to the scene
-	//Entity* ent = sceneManager->createEntity("house.mesh");
-	//SceneNode* entNode = sceneManager->createSceneNode("Character");
+	//Entity* ent = sceneManager->createEntity("GreenTree.mesh");
+	//SceneNode* entNode = sceneManager->createSceneNode("tree");
 	//entNode->attachObject(ent);
 	//sceneManager->getRootSceneNode()->addChild(entNode);
 	//entNode->setPosition(100, 1000, -450);
@@ -179,15 +182,42 @@ void CGame::Setup()
 	mModelPlacer = new CModelPlacer(sceneManager, mTerrain);
 	mPlantPlacer = new CPlantPlacer(sceneManager, mTerrain);
 	mPlantPlacer->Initialize();
-	
+
+
+	// Water
+	Entity *pWaterEntity;
+	Plane   nWaterPlane;
+
+	// create a water plane/scene node
+	nWaterPlane.normal = Vector3::UNIT_Y;
+	nWaterPlane.d = -1.5;
+	MeshManager::getSingleton().createPlane(
+		"WaterPlane",
+		ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+		nWaterPlane,
+		12000, 12000,
+		20, 20,
+		true, 1,
+		10, 10,
+		Vector3::UNIT_Z);
+
+	pWaterEntity = sceneManager->createEntity("water", "WaterPlane");
+	Ogre::MaterialPtr waterMat = static_cast<Ogre::MaterialPtr> (Ogre::MaterialManager::getSingleton().getByName("Examples/TextureEffect4"));
+	waterMat->getTechnique(0)->getPass(0)->setTransparentSortingEnabled(true);
+	waterMat->getTechnique(0)->getPass(0)->setTransparentSortingForced(true);
+	waterMat->getTechnique(0)->getPass(0)->setDiffuse(1, 1, 1, 0.1f);
+
+	pWaterEntity->setMaterial(waterMat);
+	SceneNode *waterNode =
+		sceneManager->getRootSceneNode()->createChildSceneNode("WaterNode");
+	waterNode->attachObject(pWaterEntity);
+	waterNode->translate(0, 50, 0);
+
 	Sleep(1000);
 }
 
 bool CGame::Update(const FrameEvent &evt)
 {
-	mModelPlacer->Update();
-	mPlantPlacer->Update();
-
 	mWindow->update();
 
 	pollEvents();
@@ -215,6 +245,31 @@ bool CGame::Update(const FrameEvent &evt)
 		ImGui::EndChild();
 	}
 	ImGui::Spacing();
+
+
+
+	float fWaterFlow = 0.4f * evt.timeSinceLastFrame;
+	static float fFlowAmount = 0.0f;
+	static bool fFlowUp = true;
+	SceneNode *pWaterNode = static_cast<SceneNode*>(
+		mCamera->getCamera()->getSceneManager()->getRootSceneNode()->getChild("WaterNode"));
+	if (pWaterNode)
+	{
+		if (fFlowUp)
+			fFlowAmount += fWaterFlow;
+		else
+			fFlowAmount -= fWaterFlow;
+
+		if (fFlowAmount >= 10)
+			fFlowUp = false;
+		else if (fFlowAmount <= 0.0f)
+			fFlowUp = true;
+
+		pWaterNode->translate(0, (fFlowUp ? fWaterFlow : -fWaterFlow), 0);
+	}
+
+
+
 	return true;
 }
 

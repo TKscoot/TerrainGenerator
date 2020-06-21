@@ -13,6 +13,7 @@ namespace Helpers
 		float r = random * diff;
 		return a + r;
 	}
+
 }
 
 namespace OgreRecast

@@ -73,7 +73,13 @@ bool CTerrain::Update(const FrameEvent& evt)
 		if (ImGui::Button("Generate!"))
 		{
 			UpdateTerrainHeight(0, 0);
+			
 		}
+		//ImGui::Spacing();
+		//if (ImGui::Button("Generate Falloff!"))
+		//{
+		//	GenerateFalloff();
+		//}
 		ImGui::EndChild();
 	}
 	ImGui::Spacing();
@@ -284,7 +290,7 @@ void CTerrain::InitBlendMaps(Terrain* terrain)
 	TerrainLayerBlendMap* blendMap1 = terrain->getLayerBlendMap(2);
 	float  minHeight0 = 5;
 	float  fadeDist0  = 15;
-	float  minHeight1 = 200;
+	float  minHeight1 = 450;
 	float  fadeDist1  = 15;
 	float* pBlend0    = blendMap0->getBlendPointer();
 	float* pBlend1    = blendMap1->getBlendPointer();
@@ -307,6 +313,37 @@ void CTerrain::InitBlendMaps(Terrain* terrain)
 	blendMap1->dirty();
 	blendMap0->update();
 	blendMap1->update();
+}
+
+void CTerrain::GenerateFalloff()
+{
+	const uint16 terrainSize = mTerrainGroup->getTerrainSize();
+
+
+	for (int i = 0; i < terrainSize; i++)
+	{
+		for (int j = 0; j < terrainSize; j++)
+		{
+			float x = i / (float)terrainSize * 2 - 1;
+			float y = j / (float)terrainSize * 2 - 1;
+
+			float value = std::max(Math::Abs(y), Math::Abs(x));
+			float a = 3;
+			float b = 2.2f;
+
+			float val = Math::Pow(value, a) / (Math::Pow(value, a) + Math::Pow(b - b * value, a));
+
+			//mFallOffMap[j * terrainSize + i] = val;
+
+			float* heightMap = mTerrain->getHeightData();
+
+			heightMap[i * terrainSize + j] = heightMap[i * terrainSize + j] - (val * 500);
+		}
+	}
+
+	mTerrain->dirty();
+	mTerrain->update();
+
 }
 
 void CTerrain::CreateTerrain()

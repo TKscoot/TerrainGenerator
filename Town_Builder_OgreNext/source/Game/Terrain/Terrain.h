@@ -42,6 +42,9 @@ public:
 	
 	void UpdateSeed();
 
+	void Erode(int iterations);
+	void GenerateFalloff();
+
 	void FlattenTerrainUnderObject(SceneNode* sn);
 
 	// Getter & Setter
@@ -56,8 +59,6 @@ public:
 	}
 
 	InputGeom* GetInputGeom() { return mInputGeom; }
-
-	void Erode(int iterations);
 
 private:
 	// Methods
@@ -99,7 +100,6 @@ private:
 	CHydraulicErosion* mErosion = nullptr;
 
 	int	mErosionIterations = 10;
-
 
 	std::string	mSeed = "";
 };

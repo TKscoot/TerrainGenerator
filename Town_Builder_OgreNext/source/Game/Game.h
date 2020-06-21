@@ -27,7 +27,9 @@
 #include "Game/Terrain/Terrain.h"
 #include "Game/Terrain/ModelPlacer.h"
 #include "Game/Terrain/PlantPlacer.h"
+#include "Terrain/PoissonDiscSampling.h"
 #include "Engine/Event.h"
+#include "Common/Poisson.h"
 
 using namespace Ogre;
 
@@ -103,5 +105,6 @@ private:
 
 	// Logic stuff
 	bool mShowCursor = true;
+
 };
 

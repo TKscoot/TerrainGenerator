@@ -1,0 +1,36 @@
+material Trank_bark {
+    receive_shadows on
+    technique {
+        pass {
+            diffuse 1.0 1.0 1.0 1.0
+            specular 0.1679999828338623 0.1679999828338623 0.1679999828338623 1.0 17.066665649414062
+
+            cull_hardware none 
+
+			texture_unit
+			{
+				texture bark_0004.jpg
+			}
+			
+        }
+    }
+}
+
+material DB2X2_L01 {
+    receive_shadows on
+    technique {
+        pass {
+            diffuse 1.0 1.0 1.0 1.0
+            specular 0.1679999828338623 0.1679999828338623 0.1679999828338623 1.0 17.066665649414062
+
+            cull_hardware none 
+
+
+			texture_unit
+			{
+				texture DB2X2_L01.png
+			}
+        }
+    }
+}
+

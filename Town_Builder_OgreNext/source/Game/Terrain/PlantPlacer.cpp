@@ -1,122 +1,96 @@
 #include "PlantPlacer.h"
 #include "Common/HeightFunction.h"
 
-
 void CPlantPlacer::Initialize()
 {
-	//HeightFunction::initialize(mTerrain->getTerrainGroup());
+	CEventHandler::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CPlantPlacer::Update, this, std::placeholders::_1));
+
+	CreateGrassMesh();
+	mInstancingManager = new CPoissonMeshInstance(mSceneManager, "grass", "Examples/Instancing/VTF/Grass", mTerrain, InstanceManager::InstancingTechnique::TextureVTF);
+
+	// TODO ROCK INSTANCING
+	//mInstancingManager = new CPoissonMeshInstance(mSceneManager, "rock", "Examples/Instancing/VTF/Grass", mTerrain);
+
 
 	//PlaceTrees();
-	//PlaceGrass();
 }
 
-void CPlantPlacer::Update()
-{
-	//mTreesPG->update();
-	//mGrassPG->update();
-}
-
-
-//NEEDS REFACTORING!!
-
-/*
 void CPlantPlacer::PlaceTrees()
 {
-	mEntity = mSceneManager->createEntity("Tree", "tree2.mesh");
+	const std::array<float, 2> kXMin = std::array<float, 2>{ { -6000.0f, -6000.0f }};
+	const std::array<float, 2> kXMax = std::array<float, 2>{ { 6000.0f, 6000.0f }};
 
-	//mTreesPG->setCamera(mSceneManager->getCamera("Camera"));
-	//
-	//mTreesPG->setPageSize(150);
-	//mTreesPG->setInfinite();
-	//
-	//mTreesPG->addDetailLevel<BatchPage>(150, 30, Ogre::Any(0));
-	//mTreesPG->addDetailLevel<ImpostorPage>(500, 0, Ogre::Any(0));
-	//
-	AxisAlignedBox terrainAABB = mTerrain->getTerrainGroup()->getTerrain(0, 0)->getWorldAABB();
-	TBounds bounds = mTreesPG->convertAABToTBounds(terrainAABB);
-	//
-	//mTreeLoader = new TreeLoader3D(mTreesPG, bounds);
-	//mTreesPG->setPageLoader(mTreeLoader);
-	//mTreeLoader->setMaximumScale(10);
+	const auto samples = thinks::PoissonDiskSampling(mPoissonRadius, kXMin, kXMax);
 
-	HeightFunction::initialize(mTerrain->getTerrainGroup());
-
+	float   height;
 	Vector3 position;
-	Radian yaw;
-	Real scale;
+	Degree  yaw;
+	float   scale;
 
-	for (int x = bounds.left; x < bounds.right; x++)
+	for (auto& sample : samples)
 	{
-		for (int z = bounds.left; z < bounds.right; z++)
+		height = mTerrain->getTerrainGroup()->getHeightAtWorldPosition(Vector3(sample[0], 0, sample[1]));
+		position = Vector3(sample[0], height, sample[1]);
+		yaw = Degree(Math::RangeRandom(0, 360));
+		scale = Math::RangeRandom(10.0f, 15.0f);
+
+		if (height >= 50 && height <= 450)
 		{
-
-			position.x = x;
-			position.z = z;
-			position.y = mTerrain->getTerrainGroup()->getHeightAtWorldPosition(position);
-
-
-			if (position.y > 5 && position.y < 200)
-			{
-				int rand = Math::RangeRandom(0, 10);
-				if (rand == 10)
-				{
-
-					yaw = Degree(Math::RangeRandom(0, 360));
-					scale = Math::RangeRandom(5, 10.0f);
-					//scale = 10.0f;
-
-					Ogre::stringstream ss;
-					ss << x;
-					ss << z;
-					Entity* ent = mSceneManager->createEntity("tree2.mesh");
-					SceneNode* entNode = mSceneManager->createSceneNode("tree" + ss.str());
-					entNode->attachObject(ent);
-					mSceneManager->getRootSceneNode()->addChild(entNode);
-					entNode->setPosition(position);
-					entNode->scale(Vector3(scale, scale, scale));
-					entNode->yaw(yaw);
-
-					//mTreeLoader->addTree(mEntity, position, yaw, scale);
-				}
-
-			}
-
+			Entity* ent = mSceneManager->createEntity("GreenTree.mesh");
+			ent->setMaterialLodBias(1.0);
+			ent->setMeshLodBias(1.0);
+			SceneNode* entNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
+			entNode->attachObject(ent);
+			entNode->setPosition(position);
+			entNode->setScale(Vector3(scale));
+			entNode->yaw(yaw);
+			
+			mPlacedTrees.push_back(entNode);
 		}
 
 	}
+	
+	std::cout << "Placed " << mPlacedTrees.size() << " Trees without instancing!" << std::endl;
 }
 
-void CPlantPlacer::PlaceGrass()
+void CPlantPlacer::ClearTrees()
 {
-	mGrassPG->setCamera(mSceneManager->getCamera("Camera"));
-	mGrassPG->setPageSize(150);
-	mGrassPG->setInfinite();
-	mGrassPG->addDetailLevel<GrassPage>(1500);
+	for (int i = 0; i < mPlacedTrees.size(); i++)
+	{
+		mPlacedTrees[i]->removeAndDestroyAllChildren();
+		mSceneManager->destroySceneNode(mPlacedTrees[i]);
+	}
 
-	GrassLoader* grassLoader = new GrassLoader(mGrassPG);
-	mGrassPG->setPageLoader(grassLoader);
-	grassLoader->setHeightFunction(&HeightFunction::getTerrainHeight);
-
-	GrassLayer* layer = grassLoader->addLayer("grass");
-	layer->setHeightRange(20.0f, 180.0f);
-	layer->setMinimumSize(5.0f, 5.0f);
-	layer->setMaximumSize(5.5f, 5.5f);
-	layer->setAnimationEnabled(false);
-	layer->setSwayDistribution(10.0f);
-	layer->setSwayLength(0.5f);
-	layer->setSwaySpeed(0.5f);
-	//layer->setDensity(0.4f);
-	layer->setFadeTechnique(FADETECH_GROW);
-	layer->setDensityMap("terrain.png", Forests::CHANNEL_COLOR);
-
-	AxisAlignedBox terrainAABB = mTerrain->getTerrainGroup()->getTerrain(0, 0)->getWorldAABB();
-	TBounds bounds = mGrassPG->convertAABToTBounds(terrainAABB);
-	layer->setMapBounds(bounds);
-	layer->setColorMap(mTerrain->getColorMap());
-	layer->setMaxSlope(Degree(5.0f).valueRadians());
+	mPlacedTrees.clear();
 }
 
+bool CPlantPlacer::Update(const FrameEvent &evt)
+{
+	if (ImGui::CollapsingHeader("TreePlacement", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::BeginChild("TreePlacement", ImVec2(0, 135), true);
+		ImGui::SliderFloat("Radius",	   &mPoissonRadius, 20.0f,  500.0f);
+		ImGui::SliderFloat("Min height",   &mMinHeight,      0.0f, 1000.0f);
+		ImGui::SliderFloat("Max height",   &mMaxHeight,      0.0f, 1000.0f);
+		ImGui::Spacing();
+		if (ImGui::Button("Place trees!"))
+		{
+			ClearTrees();
+			PlaceTrees();
+		}
+		ImGui::EndChild();
+	}
+	
+	ImGui::End();
 
+	return true;
+}
+
+void CPlantPlacer::Finalize()
+{
+	//delete mTreePG->getPageLoader();
+	//delete mTreePG;
+}
 
 void CPlantPlacer::CreateGrassMesh()
 {
@@ -124,7 +98,7 @@ void CPlantPlacer::CreateGrassMesh()
 
 	// create a submesh with the grass material
 	SubMesh* sm = mesh->createSubMesh();
-	sm->setMaterialName("Examples/GrassBlades");
+	sm->setMaterialName("Examples/Instancing/VTF/Grass");
 	sm->useSharedVertices = false;
 	sm->vertexData = OGRE_NEW VertexData();
 	sm->vertexData->vertexStart = 0;
@@ -132,7 +106,7 @@ void CPlantPlacer::CreateGrassMesh()
 	sm->indexData->indexCount = 18;
 
 #if defined(INCLUDE_RTSHADER_SYSTEM)
-	MaterialPtr grassMat = MaterialManager::getSingleton().getByName("Examples/GrassBlades");
+	MaterialPtr grassMat = MaterialManager::getSingleton().getByName("Examples/Instancing/VTF/Grass");
 	grassMat->getTechnique(0)->setSchemeName(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
 #endif
 
@@ -197,5 +171,12 @@ void CPlantPlacer::CreateGrassMesh()
 	}
 
 	sm->indexData->indexBuffer->unlock();  // commit index changes
+
+
+	//auto matName = sm->getMaterialName(); // MaterialName is an Ogre::String
+	//MaterialPtr matPtr = MaterialManager::getSingleton().getByName(matName); // pMaterial is an Ogre::MaterialPtr
+	//matPtr->getTechnique(0)->getPass(0)->setTransparentSortingEnabled(true);
+	//matPtr->getTechnique(0)->getPass(0)->setTransparentSortingForced(true);
+	//matPtr->getTechnique(0)->getPass(0)->setDiffuse(r, g, b, a);
+
 }
-*/
