@@ -18,6 +18,8 @@ CTerrain::~CTerrain()
 
 void CTerrain::Initialize(PSSMShadowCameraSetup* pssmSetup)
 {
+	CEventHandler::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CTerrain::Update, this, std::placeholders::_1));
+
 	mPssmSetup = pssmSetup;
 
 	mTerrainGlobals = new Ogre::TerrainGlobalOptions();
@@ -31,19 +33,24 @@ void CTerrain::Initialize(PSSMShadowCameraSetup* pssmSetup)
 	l->setSpecularColour(ColourValue(0.4, 0.4, 0.4));
 	Ogre::SceneNode* ln = mSceneManager->getRootSceneNode()->createChildSceneNode();
 	ln->setDirection(Vector3(0.55, -0.8, 0.75).normalisedCopy());
+	ln->setDirection(Vector3::NEGATIVE_UNIT_Z);
 	ln->attachObject(l);
 
 
 	ConfigureTerrainDefaults();
 
 	CreateTerrain();
+	
+	mPlantPlacer = new CPlantPlacer(mSceneManager, mTerrain);
+	mPlantPlacer->Initialize();
 
-	CEventHandler::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CTerrain::Update, this, std::placeholders::_1));
+	mPlantPlacer->PlaceVegetation();
+
 	std::function<void(int)> erodeFunction = std::bind(&CTerrain::Erode, this, std::placeholders::_1);
 	mErosion = new CHydraulicErosion(mTerrainGroup->getTerrainSize(), erodeFunction);
 
-	mInputGeom = new InputGeom(mTerrainGroup);
-	mInputGeom->getVerts();
+	//mInputGeom = new InputGeom(mTerrainGroup);
+	//mInputGeom->getVerts();
 }
 
 bool CTerrain::Update(const FrameEvent& evt)
@@ -73,13 +80,9 @@ bool CTerrain::Update(const FrameEvent& evt)
 		if (ImGui::Button("Generate!"))
 		{
 			UpdateTerrainHeight(0, 0);
-			
+
+			mPlantPlacer->PlaceVegetation();
 		}
-		//ImGui::Spacing();
-		//if (ImGui::Button("Generate Falloff!"))
-		//{
-		//	GenerateFalloff();
-		//}
 		ImGui::EndChild();
 	}
 	ImGui::Spacing();
@@ -175,16 +178,19 @@ void CTerrain::ConfigureTerrainDefaults(/*Light * l*/)
 	defaultimp.inputImage = nullptr;
 
 	// textures
-	defaultimp.layerList.resize(3);
+	defaultimp.layerList.resize(4);
 	defaultimp.layerList[0].worldSize = 120;
 	defaultimp.layerList[0].textureNames.push_back("dirt_grayrocky_diffusespecular.dds");
 	defaultimp.layerList[0].textureNames.push_back("dirt_grayrocky_normalheight.dds");
-	defaultimp.layerList[1].worldSize = 300;
-	defaultimp.layerList[1].textureNames.push_back("grass_green-01_diffusespecular.dds");
-	defaultimp.layerList[1].textureNames.push_back("grass_green-01_normalheight.dds");
-	defaultimp.layerList[2].worldSize = 200;
-	defaultimp.layerList[2].textureNames.push_back("growth_weirdfungus-03_diffusespecular.dds");
-	defaultimp.layerList[2].textureNames.push_back("growth_weirdfungus-03_normalheight.dds");
+	defaultimp.layerList[1].worldSize = 120;
+	defaultimp.layerList[1].textureNames.push_back("Sand_baseColor.png");
+	defaultimp.layerList[1].textureNames.push_back("Sand_normal.png");
+	defaultimp.layerList[2].worldSize = 300;
+	defaultimp.layerList[2].textureNames.push_back("grass_green-01_diffusespecular.dds");
+	defaultimp.layerList[2].textureNames.push_back("grass_green-01_normalheight.dds");
+	defaultimp.layerList[3].worldSize = 200;
+	defaultimp.layerList[3].textureNames.push_back("growth_weirdfungus-03_diffusespecular.dds");
+	defaultimp.layerList[3].textureNames.push_back("growth_weirdfungus-03_normalheight.dds");
 
 
 }
@@ -236,7 +242,7 @@ void CTerrain::UpdateTerrainHeight(long x, long y)
 
 	Vector2 worldOffset(Real(x*(terrainSize - 1)), Real(y*(terrainSize - 1)));
 	worldOffset += mOriginPoint;
-
+	
 	Vector2 revisedValuePoint = Vector2::ZERO;
 
 	for (uint16 i = 0; i < terrainSize; i++)
@@ -288,12 +294,16 @@ void CTerrain::InitBlendMaps(Terrain* terrain)
 	//! [blendmap]
 	TerrainLayerBlendMap* blendMap0 = terrain->getLayerBlendMap(1);
 	TerrainLayerBlendMap* blendMap1 = terrain->getLayerBlendMap(2);
+	TerrainLayerBlendMap* blendMap2 = terrain->getLayerBlendMap(3);
 	float  minHeight0 = 5;
 	float  fadeDist0  = 15;
-	float  minHeight1 = 450;
+	float  minHeight1 = 75;
 	float  fadeDist1  = 15;
+	float  minHeight2 = 700;
+	float  fadeDist2 = 50;
 	float* pBlend0    = blendMap0->getBlendPointer();
 	float* pBlend1    = blendMap1->getBlendPointer();
+	float* pBlend2    = blendMap2->getBlendPointer();
 
 	for (uint16 y = 0; y < terrain->getLayerBlendMapSize(); ++y)
 	{
@@ -306,13 +316,16 @@ void CTerrain::InitBlendMaps(Terrain* terrain)
 
 			*pBlend0++ = Math::saturate((height - minHeight0) / fadeDist0);
 			*pBlend1++ = Math::saturate((height - minHeight1) / fadeDist1);
+			*pBlend2++ = Math::saturate((height - minHeight2) / fadeDist2);
 		}
 	}
 
 	blendMap0->dirty();
 	blendMap1->dirty();
+	blendMap2->dirty();
 	blendMap0->update();
 	blendMap1->update();
+	blendMap2->update();
 }
 
 void CTerrain::GenerateFalloff()
@@ -372,7 +385,6 @@ void CTerrain::CreateTerrain()
 		Terrain* t = ti.getNext()->instance;
 		InitBlendMaps(t);
 	}
-
 }
 
 void CTerrain::UpdateSeed()

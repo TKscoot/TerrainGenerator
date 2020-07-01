@@ -22,6 +22,7 @@
 #include "Engine/Event.h"
 #include "AI/Recast/Helpers/RecastInputGeom.h"
 #include "HydraulicErosion.h"
+#include "PlantPlacer.h"
 
 #define TERRAIN_FILE_PREFIX String("testTerrain")
 #define TERRAIN_FILE_SUFFIX String("dat")
@@ -85,6 +86,7 @@ private:
 	TerrainGroup*		  mTerrainGroup;
 	Terrain*			  mTerrain;
 	InputGeom*			  mInputGeom;
+	CPlantPlacer*         mPlantPlacer;
 
 	Vector3 mTerrainPos		  = Vector3::ZERO;
 	bool	mTerrainsImported = false;

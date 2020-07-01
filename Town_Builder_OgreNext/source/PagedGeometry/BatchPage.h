@@ -93,7 +93,7 @@ namespace Forests
       Ogre::SceneManager*  m_pSceneMgr;
       BatchedGeometry*     m_pBatchGeom;
       size_t               m_nLODLevel;
-      bool                 m_bFadeEnabled = true;
+      bool                 m_bFadeEnabled;
       bool                 m_bShadersSupported;
       Ogre::Real           m_fVisibleDist;
       Ogre::Real           m_fInvisibleDist;

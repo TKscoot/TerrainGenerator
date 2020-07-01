@@ -3,6 +3,7 @@
 #include <Bites/OgreApplicationContext.h>
 #include <Ogre.h>
 #include <iostream>
+#include <imgui.h>
 
 using namespace Ogre;
 

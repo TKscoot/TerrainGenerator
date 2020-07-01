@@ -38,22 +38,14 @@ void CGame::Setup()
 	// Set Root and Window pointers
 	mRoot = ApplicationContext::getRoot();
 	mWindow = ApplicationContext::getRenderWindow();
-	mWindow->setVSyncEnabled(false);
 	WindowEventUtilities::addWindowEventListener(mWindow, this);
 
-
-	// Create a new scene manager.
 	SceneManager* sceneManager = mRoot->createSceneManager();
-	sceneManager->setAmbientLight(Ogre::ColourValue(0.0, 0.0, 0.0));
-	
-	//Create ShaderGenerator instance
-	RTShader::ShaderGenerator* shadergen = RTShader::ShaderGenerator::getSingletonPtr();
-	shadergen->addSceneManager(sceneManager);
-	RTShader::ShaderGenerator::getSingleton().initialize();
 
 	// Gui listener
 	sceneManager->addRenderQueueListener(getOverlaySystem());
 
+	mWindow->setVSyncEnabled(false);
 	// Add Frame events using methods or lambdas
 	CEventHandler::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CGame::Update, this, std::placeholders::_1));
 	CEventHandler::GetSingletonPtr()->AddFrameEndedCallback([](const FrameEvent& evt) -> bool 
@@ -74,6 +66,10 @@ void CGame::Setup()
 	// Clear viewport
 	Ogre::ColourValue fadeColour(1, 1, 1, 1);
 	mWindow->getViewport(0)->setBackgroundColour(fadeColour);
+	mWindow->getViewport(0)->setMaterialScheme(RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
+
+	//Init RTSS
+	InitializeShaderGenerator(sceneManager);
 
 	// Create InputManager instance and initialise it
 	mInputMgr = InputManager::getSingletonPtr();
@@ -84,7 +80,7 @@ void CGame::Setup()
 	ResourceGroupManager::getSingleton().addResourceLocation("media/packs/Sinbad.zip", "Zip");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/models/", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/ShadowVolume/", "FileSystem");
-	ResourceGroupManager::getSingleton().addResourceLocation("media/RTShaderLib/GLSL", "FileSystem");
+	ResourceGroupManager::getSingleton().addResourceLocation("media/RTShaderLib/", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/Terrain/", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures/skyboxes/sunnytropic", "FileSystem");
@@ -93,8 +89,8 @@ void CGame::Setup()
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/scripts", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures/nvidia", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/skyboxes/sunnytropic", "FileSystem");
-	ResourceGroupManager::getSingleton().addResourceLocation("media/trees", "FileSystem");
-	ResourceGroupManager::getSingleton().addResourceLocation("media/trees2", "FileSystem");
+	//ResourceGroupManager::getSingleton().addResourceLocation("media/trees", "FileSystem");
+	//ResourceGroupManager::getSingleton().addResourceLocation("media/trees2/", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/imgui/resources", "FileSystem", Ogre::ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME);
 
 	ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
@@ -103,11 +99,12 @@ void CGame::Setup()
 	MaterialPtr casterMat = MaterialManager::getSingletonPtr()->getByName("Ogre/shadow/depth/caster");
 
 	sceneManager->setShadowFarDistance(3000);
+	sceneManager->setAmbientLight(Ogre::ColourValue(0.15, 0.15, 0.15));
 
 	// 3 textures per directional light (see http://www.stevestreeting.com/2008/08/2 ... -are-cool/)
 	sceneManager->setShadowTextureCountPerLightType(Ogre::Light::LT_DIRECTIONAL, 3);
 	sceneManager->setShadowTextureSettings(2048, 3, Ogre::PF_FLOAT32_R);  // Uses three 512x512 shadow textures
-   // You can also do a more detailed setup, for example:
+    // You can also do a more detailed setup, for example:
 
 	sceneManager->setShadowTextureCount(3);
 	sceneManager->setShadowTextureSelfShadow(true);
@@ -142,7 +139,7 @@ void CGame::Setup()
 	// Set Light Color
 	light1->setDiffuseColour(1.0f, 1.0f, 1.0f);
 	// Set Light Reflective Color
-	light1->setSpecularColour(1.0f, 0.0f, 0.0f);
+	light1->setSpecularColour(1.0f, 1.0f, 1.0f);
 	// Set Light (Range, Brightness, Fade Speed, Rapid Fade Speed)
 	light1->setAttenuation(10, 0.5, 0.045, 0.0);
 	
@@ -155,16 +152,6 @@ void CGame::Setup()
 	lightNode->setPosition(0, 4, 10);
 	
 	sceneManager->getRootSceneNode()->addChild(lightNode);
-	
-	// Create an instance of our model and add it to the scene
-	//Entity* ent = sceneManager->createEntity("GreenTree.mesh");
-	//SceneNode* entNode = sceneManager->createSceneNode("tree");
-	//entNode->attachObject(ent);
-	//sceneManager->getRootSceneNode()->addChild(entNode);
-	//entNode->setPosition(100, 1000, -450);
-	//entNode->scale(Vector3(20, 20, 20));
-	//entNode->showBoundingBox(true);
-	
 	
 	// Create an instance of the ImGui overlay and add it to the OverlayManager
 	ImGuiOverlay *imguiOverlay = new ImGuiOverlay();
@@ -180,9 +167,6 @@ void CGame::Setup()
 	
 	// Creating Model & Plant placing Instances
 	mModelPlacer = new CModelPlacer(sceneManager, mTerrain);
-	mPlantPlacer = new CPlantPlacer(sceneManager, mTerrain);
-	mPlantPlacer->Initialize();
-
 
 	// Water
 	Entity *pWaterEntity;
@@ -251,20 +235,19 @@ bool CGame::Update(const FrameEvent &evt)
 	float fWaterFlow = 0.4f * evt.timeSinceLastFrame;
 	static float fFlowAmount = 0.0f;
 	static bool fFlowUp = true;
-	SceneNode *pWaterNode = static_cast<SceneNode*>(
-		mCamera->getCamera()->getSceneManager()->getRootSceneNode()->getChild("WaterNode"));
+	SceneNode *pWaterNode = static_cast<SceneNode*>(mCamera->getCamera()->getSceneManager()->getRootSceneNode()->getChild("WaterNode"));
 	if (pWaterNode)
 	{
 		if (fFlowUp)
 			fFlowAmount += fWaterFlow;
 		else
 			fFlowAmount -= fWaterFlow;
-
+	
 		if (fFlowAmount >= 10)
 			fFlowUp = false;
 		else if (fFlowAmount <= 0.0f)
 			fFlowUp = true;
-
+	
 		pWaterNode->translate(0, (fFlowUp ? fWaterFlow : -fWaterFlow), 0);
 	}
 
@@ -277,4 +260,70 @@ void CGame::Render()
 {
 	// renderOneFrame() instead of beginRendering() to use own game loop
 	mRoot->renderOneFrame();
+}
+
+bool CGame::InitializeShaderGenerator(SceneManager * sceneMgr)
+{
+	// Code in this Method used from stevesoftware52's OgreTest Github repo
+
+	if (Ogre::RTShader::ShaderGenerator::initialize())
+	{
+		RTShader::ShaderGenerator* shaderGenerator = Ogre::RTShader::ShaderGenerator::getSingletonPtr();
+
+		// Set the scene manager.
+		shaderGenerator->addSceneManager(sceneMgr);
+
+		// Setup core libraries and shader cache path.
+		Ogre::ResourceGroupManager::LocationList resLocationsList = Ogre::ResourceGroupManager::getSingleton().getResourceLocationList(ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+		Ogre::ResourceGroupManager::LocationList::iterator it = resLocationsList.begin();
+		Ogre::ResourceGroupManager::LocationList::iterator itEnd = resLocationsList.end();
+
+		Ogre::String shaderCoreLibsPath;
+		Ogre::String shaderCachePath;
+
+		// Default cache path is current directory;
+		shaderCachePath = "./";
+
+		// Try to find the location of the core shader lib functions and use it
+		// as shader cache path as well - this will reduce the number of generated files
+		// when running from different directories.
+		for (; it != itEnd; ++it)
+		{
+			if ((it)->archive->getName().find("RTShaderLib") != Ogre::String::npos)
+			{
+				shaderCoreLibsPath = (it)->archive->getName() + "/";
+				shaderCachePath = shaderCoreLibsPath;
+				break;
+			}
+		}
+
+		// Core shader libs not found -> shader generating will fail.
+		if (shaderCoreLibsPath.empty())
+			return false;
+
+		// Add resource location for the core shader libs. 
+		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(shaderCoreLibsPath, "FileSystem");
+
+		// Set shader cache path.
+		shaderGenerator->setShaderCachePath(shaderCachePath);
+
+		// Create and register the material manager listener.
+		ShaderGeneratorTechniqueResolverListener* materialMgrListener = new ShaderGeneratorTechniqueResolverListener(shaderGenerator);
+		Ogre::MaterialManager::getSingleton().addListener(materialMgrListener);
+
+
+
+				// Add a specialized sub-render (per-pixel lighting) state to the default scheme render state
+		Ogre::RTShader::RenderState* pMainRenderState = 
+			mShaderGenerator->createOrRetrieveRenderState(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME).first;
+		pMainRenderState->reset();
+ 
+		//mShaderGenerator->addSubRenderStateFactory(new Ogre::RTShader::PerPixelLightingFactory);
+		pMainRenderState->addTemplateSubRenderState(
+			mShaderGenerator->createSubRenderState(Ogre::RTShader::FFPTexturing::Type));
+		pMainRenderState->addTemplateSubRenderState(
+			mShaderGenerator->createSubRenderState(Ogre::RTShader::FFPTransform::Type));	
+	}
+
+	return true;
 }

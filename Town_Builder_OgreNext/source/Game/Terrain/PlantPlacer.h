@@ -1,11 +1,10 @@
 #pragma once
 #include "Ogre.h"
-#include "Terrain.h"
-#include "PagedGeometryNew/PagedGeometry.h"
-#include "PagedGeometryNew/BatchPage.h"
-#include "PagedGeometryNew/ImpostorPage.h"
-#include "PagedGeometryNew/TreeLoader3D.h"
-#include "PagedGeometryNew/GrassLoader.h"
+#include "PagedGeometry/PagedGeometry.h"
+#include "PagedGeometry/BatchPage.h"
+#include "PagedGeometry/ImpostorPage.h"
+#include "PagedGeometry/TreeLoader3D.h"
+#include "PagedGeometry/GrassLoader.h"
 #include "OgreWireBoundingBox.h"
 #include "RTShaderSystem/OgreRTShaderSystem.h"
 
@@ -13,11 +12,10 @@
 #include "Engine/Event.h"
 #include "Engine/InputManager.h"
 #include "Game/PoissonMeshInstance.h"
+#include "Common/SimplexNoise.h"
 
 using namespace Ogre;
 using namespace Forests;
-
-#define NUM_TECHNIQUES (((int)InstanceManager::InstancingTechniquesCount) + 1)
 
 class CPlantPlacer
 {
@@ -31,41 +29,39 @@ public:
 	};
 
 
-	CPlantPlacer(SceneManager* sceneManager, CTerrain* terrain)
+	CPlantPlacer(SceneManager* sceneManager, Terrain* terrain)
 		: mSceneManager(sceneManager),
 		  mTerrain(terrain)
 	{
-
 	}
+
 	void Initialize();
-	bool Update(const FrameEvent &evt);
+	bool Update(const FrameEvent &evt)
+	{
+		return true;
+	}
+
 	void Finalize();
+
+	void PlaceVegetation();
 
 private:
 
 	// Methods
-	void PlaceTrees();
-	void ClearTrees();
+
 	void CreateGrassMesh();
 
 
 	// Vars
-	SceneManager*		  mSceneManager		 = nullptr;
-	CTerrain*			  mTerrain			 = nullptr;
-	CPoissonMeshInstance* mInstancingManager = nullptr;
+	SceneManager*		  mSceneManager	  = nullptr;
+	Terrain*			  mTerrain		  = nullptr;
+	CPoissonMeshInstance* mInstancedGrass = nullptr;
+	CPoissonMeshInstance* mInstancedRocks = nullptr;
+	CPoissonMeshInstance* mTree			  = nullptr;
+	CPoissonMeshInstance* mFoliage		  = nullptr;
 
-
-	PagedGeometry* mTreePG = nullptr;
-
-	//Parameters
-	float mPoissonRadius = 100.0f;
-	float mMinHeight = 50.0f;
-	float mMaxHeight = 450.0f;
-
-	std::vector<SceneNode*> mPlacedTrees;
 
 	// Grass
 	const Real GRASS_WIDTH = 40;
 	const Real GRASS_HEIGHT = 40;
-
 };

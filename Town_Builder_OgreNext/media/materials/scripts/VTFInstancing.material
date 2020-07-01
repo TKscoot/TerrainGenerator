@@ -470,7 +470,7 @@ material Examples/Instancing/VTF/shadow_caster_dq_two_weights
 
 abstract material Examples/Instancing/VTF
 {
-    transparency_casts_shadows on
+    //transparency_casts_shadows on
     receive_shadows on
 	technique
 	{
@@ -478,6 +478,10 @@ abstract material Examples/Instancing/VTF
 
 		pass
 		{
+			ambient 0.9 0.9 0.9 1
+ 			diffuse 0.7 0.7 0.7 1
+ 			specular 0.5 0.5 0.5 1 32
+
 			alpha_rejection greater 150
 			scene_blend alpha_blend
 
@@ -494,7 +498,7 @@ abstract material Examples/Instancing/VTF
 
 			texture_unit Diffuse
 			{
-				tex_address_mode clamp
+				
 				texture		$DiffuseMap
 			}
 
@@ -602,9 +606,9 @@ material Examples/Instancing/VTF/Grass : Examples/Instancing/VTF
 	set	$DiffuseMap	gras_02.png
 }
 
-material Examples/Instancing/VTF/GreenTree : Examples/Instancing/VTF
+material Examples/Instancing/VTF/Rock3 : Examples/Instancing/VTF
 {
-	set	$DiffuseMap	BarkDecidious0107_M.jpg
+	set	$DiffuseMap	Rock3_Diffuse.png
 }
 
 material Examples/Instancing/VTF/Robot_dq : Examples/Instancing/VTF_dq

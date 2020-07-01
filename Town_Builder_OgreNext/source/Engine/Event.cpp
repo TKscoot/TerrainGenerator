@@ -9,6 +9,7 @@ bool CEventHandler::frameStarted(const FrameEvent & evt)
 		cb(evt);
 	}
 
+	ImGui::End();
 	return true;
 }
 

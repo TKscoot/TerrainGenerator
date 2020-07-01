@@ -479,19 +479,37 @@ material Examples/Instancing/VTF/HW/shadow_caster_dq_two_weights
 
 abstract material Examples/Instancing/HW_VTF
 {
-    transparency_casts_shadows on
-    receive_shadows on
+    //transparency_casts_shadows on
+    receive_shadows off
 	technique
 	{
 		shadow_caster_material Examples/Instancing/VTF/HW/shadow_caster
 
 		pass
 		{
-			alpha_rejection greater 150
-			scene_blend alpha_blend
+			//alpha_rejection greater 150
+			//scene_blend alpha_blend
+			//
+		    //cull_hardware none
+            //cull_software none
 
-		    cull_hardware none
-            cull_software none
+			diffuse 0.5 0.5 0.5 1.0
+            specular 0.4493250548839569 0.4493250548839569 0.4493250548839569 1.0 57.24333953857422
+            //alpha_to_coverage off 
+            //colour_write on 
+            //cull_hardware clockwise 
+            //depth_check on 
+            //depth_func less_equal 
+            //depth_write on 
+            //illumination_stage  
+            //light_clip_planes off 
+            //light_scissor off 
+            //normalise_normals off 
+            //polygon_mode solid 
+            //scene_blend one zero 
+            //scene_blend_op add 
+            //shading gouraud 
+            //transparent_sorting on 
 
 			vertex_program_ref Ogre/Instancing/HW_VTF_vs
 			{
@@ -531,6 +549,11 @@ material Examples/Instancing/VTF/HW/Robot : Examples/Instancing/HW_VTF
 material Examples/Instancing/VTF/HW/Grass : Examples/Instancing/HW_VTF
 {
 	set	$DiffuseMap	gras_02.png
+}
+
+material Examples/Instancing/VTF/HW/Rock3 : Examples/Instancing/HW_VTF
+{
+	set	$DiffuseMap	Rock3_Diffuse.png
 }
 
 abstract material Examples/Instancing/HW_VTF_dq

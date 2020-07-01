@@ -227,88 +227,90 @@ void BatchedGeometry::extractVertexDataFromShared(const Ogre::MeshPtr &mesh)
 	if (!mesh || !mesh->sharedVertexData)
 		return;
 
+   std::vector<SubMesh*> submeshes = mesh->getSubMeshes();
+
    // Get shared vertex data
    VertexData *oldVertexData = mesh->sharedVertexData;
 
-   for (auto subMesh : mesh->getSubMeshes())
+   for(auto& sm : submeshes)
    {
-     // SubMesh *subMesh = subMeshIterator.getNext();
+	   SubMesh *subMesh = sm;
 
-      // Get index data
-      IndexData *indexData = subMesh->indexData;
-      HardwareIndexBufferSharedPtr ib = indexData->indexBuffer;
+		// Get index data
+		IndexData *indexData = subMesh->indexData;
+		HardwareIndexBufferSharedPtr ib = indexData->indexBuffer;
 
-      // Create new nonshared vertex data
-      std::map<uint32, uint32> indicesMap;
-      VertexData *newVertexData = new VertexData();
-      newVertexData->vertexCount = CountUsedVertices(indexData, indicesMap);
-      //delete newVertexData->vertexDeclaration;
-      newVertexData->vertexDeclaration = oldVertexData->vertexDeclaration->clone();
+		// Create new nonshared vertex data
+		std::map<uint32, uint32> indicesMap;
+		VertexData *newVertexData = new VertexData();
+		newVertexData->vertexCount = CountUsedVertices(indexData, indicesMap);
+		//delete newVertexData->vertexDeclaration;
+		newVertexData->vertexDeclaration = oldVertexData->vertexDeclaration->clone();
 
-      // Create new vertex buffers
-      uint32 buffersCount = (uint32)oldVertexData->vertexBufferBinding->getBufferCount();
-      for (uint32 bufferIndex = 0; bufferIndex < buffersCount; bufferIndex++) {
+		// Create new vertex buffers
+		uint32 buffersCount = (uint32)oldVertexData->vertexBufferBinding->getBufferCount();
+		for (uint32 bufferIndex = 0; bufferIndex < buffersCount; bufferIndex++) {
 
-         // Lock shared vertex buffer
-         HardwareVertexBufferSharedPtr oldVertexBuffer = oldVertexData->vertexBufferBinding->getBuffer(bufferIndex);
-         size_t vertexSize = oldVertexBuffer->getVertexSize();
-         uint8 *oldLock = (uint8*)oldVertexBuffer->lock(0, oldVertexData->vertexCount * vertexSize, HardwareBuffer::HBL_READ_ONLY);
+		   // Lock shared vertex buffer
+		   HardwareVertexBufferSharedPtr oldVertexBuffer = oldVertexData->vertexBufferBinding->getBuffer(bufferIndex);
+		   size_t vertexSize = oldVertexBuffer->getVertexSize();
+		   uint8 *oldLock = (uint8*)oldVertexBuffer->lock(0, oldVertexData->vertexCount * vertexSize, HardwareBuffer::HBL_READ_ONLY);
 
-         // Create and lock nonshared vertex buffer
-         HardwareVertexBufferSharedPtr newVertexBuffer = HardwareBufferManager::getSingleton().createVertexBuffer(
-            vertexSize, newVertexData->vertexCount, oldVertexBuffer->getUsage(), oldVertexBuffer->hasShadowBuffer());
-         uint8 *newLock = (uint8*)newVertexBuffer->lock(0, newVertexData->vertexCount * vertexSize, HardwareBuffer::HBL_NORMAL);
+		   // Create and lock nonshared vertex buffer
+		   HardwareVertexBufferSharedPtr newVertexBuffer = HardwareBufferManager::getSingleton().createVertexBuffer(
+		      vertexSize, newVertexData->vertexCount, oldVertexBuffer->getUsage(), oldVertexBuffer->hasShadowBuffer());
+		   uint8 *newLock = (uint8*)newVertexBuffer->lock(0, newVertexData->vertexCount * vertexSize, HardwareBuffer::HBL_NORMAL);
 
-         // Copy vertices from shared vertex buffer into nonshared vertex buffer
-         std::map<uint32, uint32>::iterator i, iend = indicesMap.end();
-         for (i = indicesMap.begin(); i != iend; i++) {
-            memcpy(newLock + vertexSize * i->second, oldLock + vertexSize * i->first, vertexSize);
-         }
+		   // Copy vertices from shared vertex buffer into nonshared vertex buffer
+		   std::map<uint32, uint32>::iterator i, iend = indicesMap.end();
+		   for (i = indicesMap.begin(); i != iend; i++) {
+		      memcpy(newLock + vertexSize * i->second, oldLock + vertexSize * i->first, vertexSize);
+		   }
 
-         // Unlock vertex buffers
-         oldVertexBuffer->unlock();
-         newVertexBuffer->unlock();
+		   // Unlock vertex buffers
+		   oldVertexBuffer->unlock();
+		   newVertexBuffer->unlock();
 
-         // Bind new vertex buffer
-         newVertexData->vertexBufferBinding->setBinding(bufferIndex, newVertexBuffer);
-      }
+		   // Bind new vertex buffer
+		   newVertexData->vertexBufferBinding->setBinding(bufferIndex, newVertexBuffer);
+		}
 
-      // Re-create index buffer
-      switch (indexData->indexBuffer->getType()) {
-         case HardwareIndexBuffer::IT_16BIT:
-            {
-               uint16 *data = (uint16*)indexData->indexBuffer->lock(indexData->indexStart * sizeof(uint16), 
-                  indexData->indexCount * sizeof(uint16), HardwareBuffer::HBL_NORMAL);
+		// Re-create index buffer
+		switch (indexData->indexBuffer->getType()) {
+		   case HardwareIndexBuffer::IT_16BIT:
+		      {
+		         uint16 *data = (uint16*)indexData->indexBuffer->lock(indexData->indexStart * sizeof(uint16), 
+		            indexData->indexCount * sizeof(uint16), HardwareBuffer::HBL_NORMAL);
 
-               for (uint32 i = 0; i < indexData->indexCount; i++) {
-                  data[i] = (uint16)indicesMap[data[i]];
-               }
+		         for (uint32 i = 0; i < indexData->indexCount; i++) {
+		            data[i] = (uint16)indicesMap[data[i]];
+		         }
 
-               indexData->indexBuffer->unlock();
-            }
-            break;
+		         indexData->indexBuffer->unlock();
+		      }
+		      break;
 
-         case HardwareIndexBuffer::IT_32BIT:
-            {
-               uint32 *data = (uint32*)indexData->indexBuffer->lock(indexData->indexStart * sizeof(uint32), 
-                  indexData->indexCount * sizeof(uint32), HardwareBuffer::HBL_NORMAL);
+		   case HardwareIndexBuffer::IT_32BIT:
+		      {
+		         uint32 *data = (uint32*)indexData->indexBuffer->lock(indexData->indexStart * sizeof(uint32), 
+		            indexData->indexCount * sizeof(uint32), HardwareBuffer::HBL_NORMAL);
 
-               for (uint32 i = 0; i < indexData->indexCount; i++) {
-                  data[i] = (uint32)indicesMap[data[i]];
-               }
+		         for (uint32 i = 0; i < indexData->indexCount; i++) {
+		            data[i] = (uint32)indicesMap[data[i]];
+		         }
 
-               indexData->indexBuffer->unlock();
-            }
-            break;
+		         indexData->indexBuffer->unlock();
+		      }
+		      break;
 
-         default:
-            throw new Ogre::Exception(0, "Unknown index buffer type", "Converter.cpp::CountVertices");
-            break;
-      }
+		   default:
+		      throw new Ogre::Exception(0, "Unknown index buffer type", "Converter.cpp::CountVertices");
+		      break;
+		}
 
-      // Store new attributes
-      subMesh->useSharedVertices = false;
-      subMesh->vertexData = newVertexData;
+		// Store new attributes
+		subMesh->useSharedVertices = false;
+		subMesh->vertexData = newVertexData;
    }
 
    // Release shared vertex data
@@ -483,7 +485,7 @@ m_pParentGeom           (parent)
 
    const Ogre::MaterialPtr &parentMaterial = ent->getMaterial();
    if (!parentMaterial)
-      OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS, "BatchedGeometry. Empty parent material", "BatchedGeometry::SubBatch::SubBatch");
+      OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Empty parent material");
 
    // SVA clone material
    // This function is used to make a single clone of materials used, since the materials
@@ -559,7 +561,7 @@ void BatchedGeometry::SubBatch::addSubEntity(SubEntity *ent, const Vector3 &posi
       case VET_COLOUR_ABGR:
          break;
       default:
-         OGRE_EXCEPT(Ogre::Exception::ERR_RENDERINGAPI_ERROR, "Unknown RenderSystem color format", "BatchedGeometry::SubBatch::addSubMesh()");
+         OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Unknown RenderSystem color format");
          break;
       }
    }

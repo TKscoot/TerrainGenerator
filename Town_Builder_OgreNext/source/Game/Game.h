@@ -23,6 +23,7 @@
 
 // Game Logic
 #include "Engine/InputManager.h"
+#include "Engine/ShaderGenerator.h"
 #include "Camera.h"
 #include "Game/Terrain/Terrain.h"
 #include "Game/Terrain/ModelPlacer.h"
@@ -85,6 +86,9 @@ public:
 
 private:
 
+	// Methods
+	bool InitializeShaderGenerator(SceneManager* sceneMgr);
+
 	// Ogre stuff
 	Root*					   mRoot;
 	RenderWindow*			   mWindow;
@@ -105,6 +109,5 @@ private:
 
 	// Logic stuff
 	bool mShowCursor = true;
-
 };
 

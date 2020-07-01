@@ -516,13 +516,13 @@ material Examples/WaterStream
 			texture_unit
 			{
 				texture Water01.jpg
-				scroll_anim 0.125 0
+				scroll_anim 0.01 0.01
 			}
 
 			texture_unit
 			{
 				texture Water01.jpg
-				wave_xform scroll_y sine 0 0.1 0 0.25
+				wave_xform scroll_y sine 0 0.01 0 0.025
 			}
 		}
 	}
@@ -1246,6 +1246,43 @@ material Examples/GrassBladesShadowCaster
           }
 
       }
+}
+
+
+material grass
+{
+	//transparency_casts_shadows off
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			vertex_program_ref Examples/GrassWaverVp
+			{
+			} 
+			fragment_program_ref Examples/GrassWaverFp
+			{
+			}
+
+			//ambient 0.9 0.9 0.9 1
+			//diffuse 0.7 0.7 0.7 1
+			//specular 0.5 0.5 0.5 1 32
+			lighting off
+	
+			cull_hardware none
+			//cull_software none
+
+			scene_blend alpha_blend
+			alpha_rejection greater_equal 128
+			//transparency_casts_shadows off
+			//depth_write off
+			
+			texture_unit
+			{
+				texture grass_blade.png
+			}
+		}
+	}
 }
 
 material Examples/GrassBladesShadowReceiver
@@ -2257,7 +2294,7 @@ material Examples/TextureEffect3
 			texture_unit
 			{
 				texture Water01.jpg
-				scroll_anim -0.25 0.1
+				scroll_anim -0.025 0.01
 			}
 
 			texture_unit
@@ -2265,7 +2302,7 @@ material Examples/TextureEffect3
 				texture Water01.jpg
 				colour_op_ex add src_texture src_current
 				colour_op_multipass_fallback one one
-				scroll_anim -0.1 0.25
+				scroll_anim -0.01 0.025
 			}
 		}
 	}
@@ -2276,7 +2313,9 @@ material Examples/TextureEffect4
 	{
 		pass
 		{
-			ambient 0.3 0.3 0.3
+			ambient 0.7 0.7 0.7
+			diffuse 0.7 0.7 0.7
+			specular 0.7 0.7 0.7
 			scene_blend colour_blend
 			cull_hardware none
 			cull_software none

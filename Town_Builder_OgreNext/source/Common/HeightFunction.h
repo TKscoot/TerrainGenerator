@@ -3,10 +3,10 @@
 
 namespace HeightFunction
 {
-	Ogre::TerrainGroup* terrain = nullptr;
+	Ogre::Terrain* terrain = nullptr;
 
 	//Initializes the height function. Call this before calling getTerrainHeight()
-	void initialize(Ogre::TerrainGroup* terrainGroup)
+	void initialize(Ogre::Terrain* terrainGroup)
 	{
 		if (!terrain)
 		{

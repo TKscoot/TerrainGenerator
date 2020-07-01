@@ -22,10 +22,7 @@ Permission is granted to anyone to use this software for any purpose, including 
 #include <OgrePrerequisites.h>
 #include <OgreTextureManager.h>
 #include <OgreRenderTexture.h>
-#include <OgreEntity.h>
-#include <OgreString.h>
-#include <Ogre.h>
-#include <memory>
+#include "RTShaderSystem/OgreRTShaderSystem.h"
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
 // linux memory fix
@@ -360,8 +357,6 @@ namespace Forests
       void renderTextures(bool force);	// Renders the impostor texture grid
       void updateMaterials();				// Updates the materials to use the latest rendered impostor texture grid
 
-      Ogre::String removeInvalidCharacters(Ogre::String s);
-
       static std::map<Ogre::String, ImpostorTexture *> selfList;
       Ogre::SceneManager *sceneMgr;
       Ogre::Entity *entity;
@@ -383,7 +378,7 @@ namespace Forests
       }
 
       //This will only be used when IMPOSTOR_FILE_SAVE is set to 0
-      std::unique_ptr<ImpostorTextureResourceLoader> loader;
+      std::shared_ptr<ImpostorTextureResourceLoader> loader;
    };
 
 

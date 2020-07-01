@@ -5,91 +5,123 @@ void CPlantPlacer::Initialize()
 {
 	CEventHandler::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CPlantPlacer::Update, this, std::placeholders::_1));
 
+	HeightFunction::initialize(mTerrain);
 	CreateGrassMesh();
-	mInstancingManager = new CPoissonMeshInstance(mSceneManager, "grass", "Examples/Instancing/VTF/Grass", mTerrain, InstanceManager::InstancingTechnique::TextureVTF);
 
-	// TODO ROCK INSTANCING
-	//mInstancingManager = new CPoissonMeshInstance(mSceneManager, "rock", "Examples/Instancing/VTF/Grass", mTerrain);
+	mInstancedGrass = new CPoissonMeshInstance(
+		mSceneManager,
+		"grass",
+		"Examples/Instancing/VTF/Grass",
+		mTerrain,
+		true,
+		InstanceManager::InstancingTechnique::TextureVTF,
+		0.2f,
+		1.5f);
 
-
-	//PlaceTrees();
-}
-
-void CPlantPlacer::PlaceTrees()
-{
-	const std::array<float, 2> kXMin = std::array<float, 2>{ { -6000.0f, -6000.0f }};
-	const std::array<float, 2> kXMax = std::array<float, 2>{ { 6000.0f, 6000.0f }};
-
-	const auto samples = thinks::PoissonDiskSampling(mPoissonRadius, kXMin, kXMax);
-
-	float   height;
-	Vector3 position;
-	Degree  yaw;
-	float   scale;
-
-	for (auto& sample : samples)
+	int terrainSize = mTerrain->getSize();
+	std::vector<float> covMap;
+	for (int x = 0; x < terrainSize; x++)
 	{
-		height = mTerrain->getTerrainGroup()->getHeightAtWorldPosition(Vector3(sample[0], 0, sample[1]));
-		position = Vector3(sample[0], height, sample[1]);
-		yaw = Degree(Math::RangeRandom(0, 360));
-		scale = Math::RangeRandom(10.0f, 15.0f);
-
-		if (height >= 50 && height <= 450)
+		for (int y = 0; y < terrainSize; y++)
 		{
-			Entity* ent = mSceneManager->createEntity("GreenTree.mesh");
-			ent->setMaterialLodBias(1.0);
-			ent->setMeshLodBias(1.0);
-			SceneNode* entNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
-			entNode->attachObject(ent);
-			entNode->setPosition(position);
-			entNode->setScale(Vector3(scale));
-			entNode->yaw(yaw);
-			
-			mPlacedTrees.push_back(entNode);
+			covMap.push_back(SimplexNoise::noise(x, y));
 		}
-
-	}
-	
-	std::cout << "Placed " << mPlacedTrees.size() << " Trees without instancing!" << std::endl;
-}
-
-void CPlantPlacer::ClearTrees()
-{
-	for (int i = 0; i < mPlacedTrees.size(); i++)
-	{
-		mPlacedTrees[i]->removeAndDestroyAllChildren();
-		mSceneManager->destroySceneNode(mPlacedTrees[i]);
 	}
 
-	mPlacedTrees.clear();
-}
+	mInstancedRocks = new CPoissonMeshInstance(
+		mSceneManager,
+		"Rock3.mesh",
+		"Examples/Instancing/VTF/HW/Rock3",
+		mTerrain,
+		true,
+		InstanceManager::HWInstancingVTF,
+		0.5f,
+		8.5f,
+		120.0f,
+		400.0f,
+		8000.0f,
+		covMap,
+		0.8f);
 
-bool CPlantPlacer::Update(const FrameEvent &evt)
-{
-	if (ImGui::CollapsingHeader("TreePlacement", ImGuiTreeNodeFlags_DefaultOpen))
-	{
-		ImGui::BeginChild("TreePlacement", ImVec2(0, 135), true);
-		ImGui::SliderFloat("Radius",	   &mPoissonRadius, 20.0f,  500.0f);
-		ImGui::SliderFloat("Min height",   &mMinHeight,      0.0f, 1000.0f);
-		ImGui::SliderFloat("Max height",   &mMaxHeight,      0.0f, 1000.0f);
-		ImGui::Spacing();
-		if (ImGui::Button("Place trees!"))
-		{
-			ClearTrees();
-			PlaceTrees();
-		}
-		ImGui::EndChild();
-	}
-	
-	ImGui::End();
+	std::vector<String> treeArray;
+	treeArray.push_back("fir05_30.mesh");
+	treeArray.push_back("fir06_30.mesh");
+	treeArray.push_back("fir14_25.mesh");
 
-	return true;
+	mTree = new CPoissonMeshInstance(
+		mSceneManager,
+		treeArray,
+		"placeholder",
+		mTerrain,
+		false,
+		InstanceManager::HWInstancingVTF,
+		0.7f,
+		1.8f,
+		80.0f,
+		60.0f,
+		700.0f,
+		covMap,
+		0.8f);
+
+	std::vector<String> foliageArray;
+	foliageArray.push_back("plant1.mesh");
+	foliageArray.push_back("plant2.mesh");
+	foliageArray.push_back("farn1.mesh");
+	foliageArray.push_back("farn2.mesh");
+	foliageArray.push_back("shroom1_1.mesh");
+	foliageArray.push_back("shroom1_2.mesh");
+	foliageArray.push_back("shroom1_3.mesh");
+	foliageArray.push_back("shroom2_1.mesh");
+	foliageArray.push_back("shroom2_2.mesh");
+	foliageArray.push_back("shroom2_3.mesh");
+
+	mFoliage = new CPoissonMeshInstance(
+		mSceneManager,
+		foliageArray,
+		"placeholder",
+		mTerrain,
+		false,
+		InstanceManager::HWInstancingVTF,
+		0.7f,
+		5.4f,
+		80.0f,
+		50.0f,
+		850.0f);
 }
 
 void CPlantPlacer::Finalize()
 {
-	//delete mTreePG->getPageLoader();
-	//delete mTreePG;
+	mInstancedGrass->ClearEntities();
+	delete mInstancedGrass;
+	mInstancedGrass = nullptr;
+
+	mInstancedRocks->ClearEntities();
+	delete mInstancedRocks;
+	mInstancedRocks = nullptr;
+
+	mTree->ClearEntities();
+	delete mTree;
+	mTree = nullptr;
+
+	mFoliage->ClearEntities();
+	delete mFoliage;
+	mFoliage = nullptr;
+}
+
+void CPlantPlacer::PlaceVegetation()
+{
+	mInstancedGrass->ClearEntities();
+	mInstancedGrass->PlaceEntities();
+	
+	mInstancedRocks->ClearEntities();
+	mInstancedRocks->PlaceEntities();
+	
+	mTree->ClearEntities();
+	mTree->PlaceEntities();
+	
+	mFoliage->ClearEntities();
+	mFoliage->PlaceEntities();
+
 }
 
 void CPlantPlacer::CreateGrassMesh()
@@ -173,10 +205,8 @@ void CPlantPlacer::CreateGrassMesh()
 	sm->indexData->indexBuffer->unlock();  // commit index changes
 
 
-	//auto matName = sm->getMaterialName(); // MaterialName is an Ogre::String
-	//MaterialPtr matPtr = MaterialManager::getSingleton().getByName(matName); // pMaterial is an Ogre::MaterialPtr
-	//matPtr->getTechnique(0)->getPass(0)->setTransparentSortingEnabled(true);
-	//matPtr->getTechnique(0)->getPass(0)->setTransparentSortingForced(true);
-	//matPtr->getTechnique(0)->getPass(0)->setDiffuse(r, g, b, a);
-
+	auto matName = sm->getMaterialName(); // MaterialName is an Ogre::String
+	MaterialPtr matPtr = MaterialManager::getSingleton().getByName(matName); // pMaterial is an Ogre::MaterialPtr
+	matPtr->getTechnique(0)->getPass(0)->setTransparentSortingEnabled(true);
+	matPtr->getTechnique(0)->getPass(0)->setTransparentSortingForced(true);
 }
