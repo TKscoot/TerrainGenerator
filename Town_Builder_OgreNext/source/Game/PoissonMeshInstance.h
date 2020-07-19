@@ -91,7 +91,7 @@ public:
 		float			   poissonRadius	 = 80.0f,
 		float			   minHeight		 = 60.0f,
 		float			   maxHeight		 = 700.0f,
-		std::vector<float> coverageMap		 = std::vector<float>(),
+		const std::vector<float> &coverageMap		 = std::vector<float>(),
 		float			   coverageThreshold = 1.0f
 	)
 		: mSceneMgr(sceneManager)

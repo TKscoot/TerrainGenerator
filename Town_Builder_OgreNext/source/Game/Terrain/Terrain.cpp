@@ -41,7 +41,8 @@ void CTerrain::Initialize(PSSMShadowCameraSetup* pssmSetup)
 
 	CreateTerrain();
 	
-	mPlantPlacer = new CPlantPlacer(mSceneManager, mTerrain);
+	mBiomeHandler = new CBiomeHandler(mTerrain);
+	mPlantPlacer = new CPlantPlacer(mSceneManager, mTerrain, mBiomeHandler);
 	mPlantPlacer->Initialize();
 
 	mPlantPlacer->PlaceVegetation();
@@ -51,6 +52,8 @@ void CTerrain::Initialize(PSSMShadowCameraSetup* pssmSetup)
 
 	//mInputGeom = new InputGeom(mTerrainGroup);
 	//mInputGeom->getVerts();
+
+
 }
 
 bool CTerrain::Update(const FrameEvent& evt)
@@ -66,7 +69,7 @@ bool CTerrain::Update(const FrameEvent& evt)
 
 	if (ImGui::CollapsingHeader("Terrain", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::BeginChild("Terrain", ImVec2(0, 155), true);
+		ImGui::BeginChild("Terrain", ImVec2(0, 185), true);
 		if (ImGui::InputText("Seed", str1, IM_ARRAYSIZE(str1)))
 		{
 			ss << str1;
@@ -77,11 +80,20 @@ bool CTerrain::Update(const FrameEvent& evt)
 		ImGui::SliderFloat("Height Scale", &mHeightScale, 0.05f, 2.5f);
 		ImGui::SliderFloat("Power factor", &mPowerFactor, 0.1f,  3.0f);
 		ImGui::Spacing();
+		ImGui::Checkbox("Place vegetation on generation", &mPlaceVegetation);
+		ImGui::Spacing();
 		if (ImGui::Button("Generate!"))
 		{
 			UpdateTerrainHeight(0, 0);
 
-			mPlantPlacer->PlaceVegetation();
+			if (mPlaceVegetation)
+			{
+				mPlantPlacer->PlaceVegetation();
+			}
+			else
+			{
+				mPlantPlacer->ClearVegetation();
+			}
 		}
 		ImGui::EndChild();
 	}
@@ -188,7 +200,7 @@ void CTerrain::ConfigureTerrainDefaults(/*Light * l*/)
 	defaultimp.layerList[2].worldSize = 300;
 	defaultimp.layerList[2].textureNames.push_back("grass_green-01_diffusespecular.dds");
 	defaultimp.layerList[2].textureNames.push_back("grass_green-01_normalheight.dds");
-	defaultimp.layerList[3].worldSize = 200;
+	defaultimp.layerList[3].worldSize = 800;
 	defaultimp.layerList[3].textureNames.push_back("growth_weirdfungus-03_diffusespecular.dds");
 	defaultimp.layerList[3].textureNames.push_back("growth_weirdfungus-03_normalheight.dds");
 
@@ -238,7 +250,6 @@ void CTerrain::UpdateTerrainHeight(long x, long y)
 	UpdateSeed();
 
 	const uint16 terrainSize = mTerrainGroup->getTerrainSize();
-	float* heightMap = OGRE_ALLOC_T(float, terrainSize*terrainSize, MEMCATEGORY_GEOMETRY);
 
 	Vector2 worldOffset(Real(x*(terrainSize - 1)), Real(y*(terrainSize - 1)));
 	worldOffset += mOriginPoint;

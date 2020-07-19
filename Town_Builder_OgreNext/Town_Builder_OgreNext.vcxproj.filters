@@ -129,6 +129,9 @@
     <ClCompile Include="source\Game\Terrain\Water.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Game\Terrain\BiomeHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Game\Camera.h">
@@ -231,6 +234,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Engine\ShaderGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Game\Terrain\BiomeHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

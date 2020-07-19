@@ -87,6 +87,39 @@ void CPlantPlacer::Initialize()
 		80.0f,
 		50.0f,
 		850.0f);
+
+
+	// BIOMES
+
+	mBiomeVegDescs = mBiomeHandler->GetBiomeVegetationDescriptions();
+
+	mBiomeVegDescs[0].meshes.push_back("fir05_30.mesh");
+	mBiomeVegDescs[0].meshes.push_back("fir06_30.mesh");
+	mBiomeVegDescs[0].meshes.push_back("fir14_25.mesh");
+	mBiomeVegDescs[1].meshes.push_back("plant1.mesh");
+	mBiomeVegDescs[2].meshes.push_back("farn1.mesh");
+	mBiomeVegDescs[3].meshes.push_back("shroom1_1.mesh");
+
+	for (int i = 0; i < mBiomeVegDescs.size(); i++)
+	{
+		mBiomeVegDescs[i].meshInstance = new CPoissonMeshInstance(
+			mSceneManager,
+			mBiomeVegDescs[i].meshes,
+			"placeholder",
+			mTerrain,
+			false,
+			InstanceManager::HWInstancingVTF,
+			0.8f,
+			8.0f,
+			80.0f,
+			-1000.0f,
+			1000.0f,
+			mBiomeVegDescs[i].coverageMap
+		);
+	}
+
+
+
 }
 
 void CPlantPlacer::Finalize()
@@ -110,18 +143,36 @@ void CPlantPlacer::Finalize()
 
 void CPlantPlacer::PlaceVegetation()
 {
-	mInstancedGrass->ClearEntities();
-	mInstancedGrass->PlaceEntities();
-	
-	mInstancedRocks->ClearEntities();
-	mInstancedRocks->PlaceEntities();
-	
-	mTree->ClearEntities();
-	mTree->PlaceEntities();
-	
-	mFoliage->ClearEntities();
-	mFoliage->PlaceEntities();
+	ClearVegetation();
 
+	//mInstancedGrass->PlaceEntities();
+	//mInstancedRocks->PlaceEntities();
+	//mTree->PlaceEntities();
+	//mFoliage->PlaceEntities();
+	mBiomeHandler->UpdateCoverageMap();
+	mBiomeVegDescs[0].meshInstance->PlaceEntities();
+	mBiomeVegDescs[1].meshInstance->PlaceEntities();
+	mBiomeVegDescs[2].meshInstance->PlaceEntities();
+	mBiomeVegDescs[3].meshInstance->PlaceEntities();
+
+	std::cout << "Placed vegetation at biome " << static_cast<Biomes>(0) << std::endl;
+	//for (int i = 0; i < mBiomeVegDescs.size(); i++)
+	//{
+	//	mBiomeVegDescs[i].meshInstance->PlaceEntities();
+	//}
+}
+
+void CPlantPlacer::ClearVegetation()
+{
+	mInstancedGrass->ClearEntities();
+	mInstancedRocks->ClearEntities();
+	mTree->ClearEntities();
+	mFoliage->ClearEntities();
+
+	for (int i = 0; i < mBiomeVegDescs.size(); i++)
+	{
+		mBiomeVegDescs[i].meshInstance->ClearEntities();
+	}
 }
 
 void CPlantPlacer::CreateGrassMesh()

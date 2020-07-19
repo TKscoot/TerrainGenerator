@@ -2322,7 +2322,7 @@ material Examples/TextureEffect4
 
 			texture_unit
 			{
-				texture Water02.jpg
+				texture wasser.jpg
 				scroll_anim 0.01 0.01
 			}
 		}

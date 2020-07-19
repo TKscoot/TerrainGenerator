@@ -82,6 +82,7 @@ void CGame::Setup()
 	ResourceGroupManager::getSingleton().addResourceLocation("media/ShadowVolume/", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/RTShaderLib/", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/Terrain/", "FileSystem");
+	ResourceGroupManager::getSingleton().addResourceLocation("media/ET/", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures/skyboxes/sunnytropic", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures/house", "FileSystem");

@@ -23,6 +23,7 @@
 #include "AI/Recast/Helpers/RecastInputGeom.h"
 #include "HydraulicErosion.h"
 #include "PlantPlacer.h"
+#include "BiomeHandler.h"
 
 #define TERRAIN_FILE_PREFIX String("testTerrain")
 #define TERRAIN_FILE_SUFFIX String("dat")
@@ -87,6 +88,7 @@ private:
 	Terrain*			  mTerrain;
 	InputGeom*			  mInputGeom;
 	CPlantPlacer*         mPlantPlacer;
+	CBiomeHandler*        mBiomeHandler;
 
 	Vector3 mTerrainPos		  = Vector3::ZERO;
 	bool	mTerrainsImported = false;
@@ -97,6 +99,8 @@ private:
 	float	mFrequency   = 1.0f;
 	float   mPowerFactor = 2.0f;
 	int		mOctaves     = 5;
+
+	bool mPlaceVegetation = true;
 
 	// erosion
 	CHydraulicErosion* mErosion = nullptr;

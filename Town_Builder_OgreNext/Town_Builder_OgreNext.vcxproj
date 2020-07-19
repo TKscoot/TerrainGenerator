@@ -38,6 +38,7 @@
     <ClCompile Include="source\Game\Game.cpp" />
     <ClCompile Include="source\Engine\InputManager.cpp" />
     <ClCompile Include="source\Game\PoissonMeshInstance.cpp" />
+    <ClCompile Include="source\Game\Terrain\BiomeHandler.cpp" />
     <ClCompile Include="source\Game\Terrain\HydraulicErosion.cpp" />
     <ClCompile Include="source\Game\Terrain\ModelPlacer.cpp" />
     <ClCompile Include="source\Game\Terrain\PlantPlacer.cpp" />
@@ -74,6 +75,7 @@
     <ClInclude Include="source\Common\Helpers.h" />
     <ClInclude Include="source\Engine\InputManager.h" />
     <ClInclude Include="source\Game\PoissonMeshInstance.h" />
+    <ClInclude Include="source\Game\Terrain\BiomeHandler.h" />
     <ClInclude Include="source\Game\Terrain\ModelPlacer.h" />
     <ClInclude Include="source\Game\Terrain\HydraulicErosion.h" />
     <ClInclude Include="source\Game\Terrain\PlantPlacer.h" />

@@ -12,6 +12,7 @@
 #include "Engine/Event.h"
 #include "Engine/InputManager.h"
 #include "Game/PoissonMeshInstance.h"
+#include "Game/Terrain/BiomeHandler.h"
 #include "Common/SimplexNoise.h"
 
 using namespace Ogre;
@@ -29,9 +30,10 @@ public:
 	};
 
 
-	CPlantPlacer(SceneManager* sceneManager, Terrain* terrain)
+	CPlantPlacer(SceneManager* sceneManager, Terrain* terrain, CBiomeHandler* biomeHandler)
 		: mSceneManager(sceneManager),
-		  mTerrain(terrain)
+		  mTerrain(terrain),
+		  mBiomeHandler(biomeHandler)
 	{
 	}
 
@@ -44,6 +46,7 @@ public:
 	void Finalize();
 
 	void PlaceVegetation();
+	void ClearVegetation();
 
 private:
 
@@ -55,10 +58,13 @@ private:
 	// Vars
 	SceneManager*		  mSceneManager	  = nullptr;
 	Terrain*			  mTerrain		  = nullptr;
+	CBiomeHandler*		  mBiomeHandler   = nullptr;
 	CPoissonMeshInstance* mInstancedGrass = nullptr;
 	CPoissonMeshInstance* mInstancedRocks = nullptr;
 	CPoissonMeshInstance* mTree			  = nullptr;
 	CPoissonMeshInstance* mFoliage		  = nullptr;
+
+	std::array<CBiomeHandler::BiomeVegetationDescription, static_cast<int>(BIOME_LAST)> mBiomeVegDescs;
 
 
 	// Grass
