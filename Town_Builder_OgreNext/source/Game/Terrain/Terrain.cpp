@@ -20,7 +20,7 @@ void CTerrain::Initialize(PSSMShadowCameraSetup* pssmSetup)
 {
 	CEventHandler::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CTerrain::Update, this, std::placeholders::_1));
 
-	mPssmSetup = pssmSetup;
+	//mPssmSetup = pssmSetup;
 
 	mTerrainGlobals = new Ogre::TerrainGlobalOptions();
 	mTerrainGroup   = new Ogre::TerrainGroup(mSceneManager, Ogre::Terrain::ALIGN_X_Z, TERRAIN_SIZE, TERRAIN_WORLD_SIZE);
@@ -52,6 +52,8 @@ void CTerrain::Initialize(PSSMShadowCameraSetup* pssmSetup)
 
 	//mInputGeom = new InputGeom(mTerrainGroup);
 	//mInputGeom->getVerts();
+
+	mTerrainMaterial->generate(mTerrain);
 
 
 }
@@ -157,6 +159,16 @@ void CTerrain::ConfigureTerrainDefaults(/*Light * l*/)
 
 	Light* l = mSceneManager->getLight("terrainLight");
 
+	// Custom Terrain Material for splatting Textures
+	// Set Ogre Material  with the name "TerrainMaterial" in constructor
+	mTerrainMaterial = OGRE_NEW TerrainMaterial("CustomTerrain", false, false);
+	mTerrainMaterial->setMaterialByName("CustomTerrain");
+	TerrainMaterialGeneratorPtr terrainMaterialGenerator(mTerrainMaterial);
+	//terrainMaterialGenerator.reset<TerrainMaterial>(mTerrainMaterial);
+	
+	mTerrainGlobals->setDefaultMaterialGenerator(terrainMaterialGenerator);
+
+
 	// Important to set these so that the terrain knows what to use for derived (non-realtime) data
 	mTerrainGlobals->setUseVertexCompressionWhenAvailable(false);
 	mTerrainGlobals->setCastsDynamicShadows(true);
@@ -165,29 +177,29 @@ void CTerrain::ConfigureTerrainDefaults(/*Light * l*/)
 	mTerrainGlobals->setCompositeMapDiffuse(l->getDiffuseColour());
 	mTerrainGlobals->setUseRayBoxDistanceCalculation(true);
 
-	Ogre::TerrainMaterialGeneratorA::SM2Profile* matProfile;
-	matProfile = static_cast<Ogre::TerrainMaterialGeneratorA::SM2Profile*>(
-		mTerrainGlobals->getDefaultMaterialGenerator()->getActiveProfile()
-		);
-
-	//  Make sure PSSM is already setup
-	matProfile->setReceiveDynamicShadowsEnabled(true);
-	matProfile->setReceiveDynamicShadowsPSSM(mPssmSetup);  // PSSM shadowing
-	matProfile->setReceiveDynamicShadowsDepth(true);       // with depth
-	matProfile->setReceiveDynamicShadowsLowLod(false);
-
-	matProfile->setLightmapEnabled(false);
+	//Ogre::TerrainMaterialGeneratorA::SM2Profile* matProfile;
+	//matProfile = static_cast<Ogre::TerrainMaterialGeneratorA::SM2Profile*>(
+	//	mTerrainGlobals->getDefaultMaterialGenerator()->getActiveProfile()
+	//	);
+	//
+	////  Make sure PSSM is already setup
+	//matProfile->setReceiveDynamicShadowsEnabled(true);
+	//matProfile->setReceiveDynamicShadowsPSSM(mPssmSetup);  // PSSM shadowing
+	//matProfile->setReceiveDynamicShadowsDepth(true);       // with depth
+	//matProfile->setReceiveDynamicShadowsLowLod(false);
+	//
+	//matProfile->setLightmapEnabled(false);
 
 
 	// Configure default import settings for if we use imported image
 	Terrain::ImportData& defaultimp = mTerrainGroup->getDefaultImportSettings();
-	defaultimp.terrainSize = TERRAIN_SIZE;
-	defaultimp.worldSize = TERRAIN_WORLD_SIZE;
-	defaultimp.inputScale = 600;
+	defaultimp.terrainSize  = TERRAIN_SIZE;
+	defaultimp.worldSize    = TERRAIN_WORLD_SIZE;
+	defaultimp.inputScale   = 600;
 	defaultimp.minBatchSize = 33;
 	defaultimp.maxBatchSize = 65;
-	defaultimp.inputFloat = nullptr;
-	defaultimp.inputImage = nullptr;
+	defaultimp.inputFloat   = nullptr;
+	defaultimp.inputImage   = nullptr;
 
 	// textures
 	defaultimp.layerList.resize(4);

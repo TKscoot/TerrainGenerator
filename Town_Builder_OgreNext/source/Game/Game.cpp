@@ -37,6 +37,7 @@ void CGame::Setup()
 
 	// Set Root and Window pointers
 	mRoot = ApplicationContext::getRoot();
+	//mRoot->loadPlugin("Plugin_CgProgramManager");
 	mWindow = ApplicationContext::getRenderWindow();
 	WindowEventUtilities::addWindowEventListener(mWindow, this);
 
@@ -115,20 +116,20 @@ void CGame::Setup()
 	sceneManager->setShadowTextureCasterMaterial(casterMat);
 
 	// shadow camera setup
-	Ogre::PSSMShadowCameraSetup* pssmSetup = new Ogre::PSSMShadowCameraSetup();
-	if (mPssmSetup)
-	delete mPssmSetup;
-	mPssmSetup = pssmSetup;
-	
-	mPssmSetup->calculateSplitPoints(3, 0.1, sceneManager->getShadowFarDistance());    // Calculate 3 split points (PSSM 3)
-	
-	// Increase near distance when experiencing artifacts
-	mPssmSetup->setSplitPadding(0.1);
-	mPssmSetup->setOptimalAdjustFactor(0, 2);
-	mPssmSetup->setOptimalAdjustFactor(1, 1);
-	mPssmSetup->setOptimalAdjustFactor(2, 0.5);
-	
-	sceneManager->setShadowCameraSetup(Ogre::ShadowCameraSetupPtr(mPssmSetup));
+	//Ogre::PSSMShadowCameraSetup* pssmSetup = new Ogre::PSSMShadowCameraSetup();
+	//if (mPssmSetup)
+	//delete mPssmSetup;
+	//mPssmSetup = pssmSetup;
+	//
+	//mPssmSetup->calculateSplitPoints(3, 0.1, sceneManager->getShadowFarDistance());    // Calculate 3 split points (PSSM 3)
+	//
+	//// Increase near distance when experiencing artifacts
+	//mPssmSetup->setSplitPadding(0.1);
+	//mPssmSetup->setOptimalAdjustFactor(0, 2);
+	//mPssmSetup->setOptimalAdjustFactor(1, 1);
+	//mPssmSetup->setOptimalAdjustFactor(2, 0.5);
+	//
+	//sceneManager->setShadowCameraSetup(Ogre::ShadowCameraSetupPtr(mPssmSetup));
 	
 	
 	// Load and apply Skybox
@@ -197,7 +198,6 @@ void CGame::Setup()
 		sceneManager->getRootSceneNode()->createChildSceneNode("WaterNode");
 	waterNode->attachObject(pWaterEntity);
 	waterNode->translate(0, 50, 0);
-
 	Sleep(1000);
 }
 

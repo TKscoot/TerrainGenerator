@@ -15,6 +15,7 @@
 #include "Terrain/OgreTerrainMaterialGeneratorA.h"
 #include "Terrain/OgreTerrain.h"
 #include "Terrain/OgreTerrainGroup.h"
+#include "TerrainMaterial.h"
 
 #include "Common/SimplexNoise.h"
 #include "Common/Helpers.h"
@@ -86,6 +87,7 @@ private:
 	TerrainGlobalOptions* mTerrainGlobals;
 	TerrainGroup*		  mTerrainGroup;
 	Terrain*			  mTerrain;
+	TerrainMaterial*	  mTerrainMaterial;
 	InputGeom*			  mInputGeom;
 	CPlantPlacer*         mPlantPlacer;
 	CBiomeHandler*        mBiomeHandler;
@@ -100,7 +102,7 @@ private:
 	float   mPowerFactor = 2.0f;
 	int		mOctaves     = 5;
 
-	bool mPlaceVegetation = true;
+	bool mPlaceVegetation = false;
 
 	// erosion
 	CHydraulicErosion* mErosion = nullptr;

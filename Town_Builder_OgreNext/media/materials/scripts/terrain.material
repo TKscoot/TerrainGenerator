@@ -1,0 +1,88 @@
+material TerrainMaterial 
+{
+
+  technique Default
+  {
+    // requires PS 2.x
+   	
+    pass Main
+    {
+      vertex_program_ref Terrain/Programs/terrain_vp
+      {
+      }
+      
+      fragment_program_ref Terrain/Programs/terrain_fp
+      {		
+		param_named exponent float 63
+        param_named splatScaleX float 96
+		param_named splatScaleZ float 96
+      }
+      
+		texture_unit 0
+		{
+			// first coverage map
+			texture CovMap1.png
+		}
+		texture_unit 1
+		{
+			// second coverage map
+			texture CovMap1.png
+		}
+		texture_unit 2
+		{
+			// third coverage map
+			texture CovMap1.png
+		}
+
+		// splatting textures
+		texture_unit 3
+		{
+			texture splatting0.png
+		}
+		texture_unit 4
+		{
+			texture splatting1.png
+		}
+		texture_unit
+		{
+			texture splatting2.png
+		}
+		texture_unit
+		{
+			texture splatting3.png
+		}
+		texture_unit
+		{
+			texture splatting4.png
+		}
+		texture_unit
+		{
+			texture splatting5.png
+		}
+		texture_unit
+		{
+			texture splatting5.png
+		}
+		texture_unit
+		{
+			texture splatting5.png
+		}
+		texture_unit
+		{
+			texture splatting5.png
+		}	 
+
+		texture_unit 
+		{
+			texture splatting5.png
+		}
+		
+		texture_unit 
+		{
+			texture ETlightmap.png
+		}
+    } // pass
+    
+} // technique
+
+}

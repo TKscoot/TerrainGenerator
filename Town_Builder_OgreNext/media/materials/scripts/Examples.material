@@ -795,12 +795,13 @@ material Examples/GrassFloor
 	}
 }
 
-vertex_program Examples/GrassWaverVpCg cg
+vertex_program Examples/GrassWaverVpCg hlsl
 {
 	source Grass.cg
 	entry_point grass_vp
-	profiles vs_4_0 vs_4_0_level_9_1 vs_4_0_level_9_3 vs_1_1 arbvp1
-
+	//profiles vs_4_0 vs_4_0_level_9_1 vs_4_0_level_9_3 vs_1_1 arbvp1
+	target vs_4_0
+	
     default_params
     {
         param_named_auto worldViewProj worldviewproj_matrix

@@ -45,25 +45,38 @@ void write_enum_value(std::ostream& out, EnumType t,
         return out; \
     }
 
-DEFINE_ENUM(Biomes, 
+DEFINE_ENUM(Biomes,
 	0,
-	OCEAN, 
-	BEACH, 
-	SCORCHED, 
-	BARE, 
-	TUNDRA, 
-	SNOW, 
-	TEMPERATE_DESERT, 
-	SHRUBLAND, 
-	TAIGA, 
-	GRASSLAND, 
-	TEMPERATE_DECIDUOUS_FOREST, 
-	TEMPERATE_RAIN_FOREST, 
-	SUBTROPICAL_DESERT, 
-	TROPICAL_SEASONAL_FOREST, 
+	OCEAN,
+	BEACH,
+	SNOW,
+	TEMPERATE_DESERT,
+	SHRUBLAND,
+	TAIGA,
+	GRASSLAND,
+	TEMPERATE_DECIDUOUS_FOREST,
+	TEMPERATE_RAIN_FOREST,
+	SUBTROPICAL_DESERT,
+	TROPICAL_SEASONAL_FOREST,
 	TROPICAL_RAIN_FOREST,
 	BIOME_LAST
 )
+
+//DEFINE_ENUM(Biomes,
+//	0,
+//	OCEAN,
+//	BEACH,
+//	TUNDRA,
+//	TEMPERATE_GRASSLAND,
+//	BOREAL_FOREST,
+//	WOODLAND,
+//	TEMPERATE_SEASONAL_FOREST,
+//	TEMPERATE_RAIN_FOREST,
+//	SUBTROPICAL_DESERT,
+//	SAVANNA,
+//	TROPICAL_RAINFOREST,
+//	BIOME_LAST
+//)
 
 class CBiomeHandler
 {
@@ -91,7 +104,6 @@ private:
 	// Methods
 	void CalculateMoistureMap();
 
-
 	// Variables
 	Terrain* mTerrain = nullptr;
 	//ET::SplattingManager* mSplatMgr = nullptr;
@@ -110,4 +122,7 @@ private:
 	float	mFrequency = 1.0f;
 	float   mPowerFactor = 2.0f;
 	int		mOctaves = 5;
+
+	Image* img;
+
 };

@@ -5,6 +5,9 @@ CBiomeHandler::CBiomeHandler(Terrain * terrain)
 {
 	const uint16 terrainSize = mTerrain->getSize();
 
+	img = new Image();
+	img->load("DefaultCovMap.png", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+
 	// Splat manager init
 	//mSplatMgr = new ET::SplattingManager("ETSplatting", "ET", terrainSize, terrainSize);
 	//mSplatMgr->setNumTextures(6);
@@ -64,6 +67,8 @@ CBiomeHandler::CBiomeHandler(Terrain * terrain)
 		std::cout << "Biome " << static_cast<Biomes>(i) << " occupies " << occurance[i] << " terrain points" << std::endl;
 	}
 
+	img->save("media/materials/textures/CovMap1.png");
+
 }
 
 Biomes CBiomeHandler::GetBiomeAtPoint(int x, int y)
@@ -73,19 +78,28 @@ Biomes CBiomeHandler::GetBiomeAtPoint(int x, int y)
 	float e = mNormalisedHeightMap[y * terrainSize + x];
 	float m = mMoistureMap[y * terrainSize + x];
 
-	if (e < 50)  return OCEAN;
-	if (e < 70) return BEACH;
+	if (e < 50)
+	{
+		img->setColourAt(ColourValue(1.0f, 0.0f, 0.0f), x, y, 0);
+		return OCEAN;
+	}
+	if (e < 70)
+	{
+		img->setColourAt(ColourValue(0.0f, 1.0f, 0.0f), x, y, 0);
+		return BEACH;
+	}
 
 	if (e > 800)
 	{
-		if (m < 0.1) return SCORCHED;
-		if (m < 0.2) return BARE;
-		if (m < 0.5) return TUNDRA;
+		img->setColourAt(ColourValue(0.0f, 0.0f, 1.0f), x, y, 0);
 		return SNOW;
 	}
 
 	if (e > 600)
 	{
+		ColourValue cv = img->getColourAt(x, y, 0);
+		img->setColourAt(ColourValue(cv.r, cv.g, cv.b, 0.0f), x, y, 0);
+
 		if (m < 0.33) return TEMPERATE_DESERT;
 		if (m < 0.66) return SHRUBLAND;
 		return TAIGA;

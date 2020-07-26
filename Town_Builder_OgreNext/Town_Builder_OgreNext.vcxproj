@@ -45,6 +45,7 @@
     <ClCompile Include="source\Common\SimplexNoise.cpp" />
     <ClCompile Include="source\Game\Terrain\PoissonDiscSampling.cpp" />
     <ClCompile Include="source\Game\Terrain\Terrain.cpp" />
+    <ClCompile Include="source\Game\Terrain\TerrainMaterial.cpp" />
     <ClCompile Include="source\Game\Terrain\Water.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\PagedGeometry\BatchedGeometry.cpp" />
@@ -82,6 +83,7 @@
     <ClInclude Include="source\Common\SimplexNoise.h" />
     <ClInclude Include="source\Game\Terrain\PoissonDiscSampling.h" />
     <ClInclude Include="source\Game\Terrain\Terrain.h" />
+    <ClInclude Include="source\Game\Terrain\TerrainMaterial.h" />
     <ClInclude Include="source\Game\Terrain\Water.h" />
     <ClInclude Include="source\PagedGeometry\BatchedGeometry.h" />
     <ClInclude Include="source\PagedGeometry\BatchPage.h" />
