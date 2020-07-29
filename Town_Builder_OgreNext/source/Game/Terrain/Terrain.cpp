@@ -42,6 +42,7 @@ void CTerrain::Initialize(PSSMShadowCameraSetup* pssmSetup)
 	CreateTerrain();
 	
 	mBiomeHandler = new CBiomeHandler(mTerrain);
+	mBiomeHandler->UpdateCoverageMap();
 	mPlantPlacer = new CPlantPlacer(mSceneManager, mTerrain, mBiomeHandler);
 	mPlantPlacer->Initialize();
 
@@ -87,6 +88,15 @@ bool CTerrain::Update(const FrameEvent& evt)
 		if (ImGui::Button("Generate!"))
 		{
 			UpdateTerrainHeight(0, 0);
+			mBiomeHandler->UpdateCoverageMap();
+
+			Sleep(3000);
+
+			mTerrainMaterial->generate(mTerrain);
+			mTerrain->getMaterial()->compile();
+			mTerrain->getMaterial()->unload();
+			mTerrain->getMaterial()->load();
+			mTerrain->getMaterial()->reload();
 
 			if (mPlaceVegetation)
 			{

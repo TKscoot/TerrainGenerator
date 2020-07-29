@@ -4,6 +4,7 @@
 
 #include <Ogre.h>
 #include <Terrain/OgreTerrain.h>
+#include <OgreTexture.h>
 
 #include "Common/SimplexNoise.h"
 #include "ETM/ETSplattingManager.h"
@@ -62,22 +63,6 @@ DEFINE_ENUM(Biomes,
 	BIOME_LAST
 )
 
-//DEFINE_ENUM(Biomes,
-//	0,
-//	OCEAN,
-//	BEACH,
-//	TUNDRA,
-//	TEMPERATE_GRASSLAND,
-//	BOREAL_FOREST,
-//	WOODLAND,
-//	TEMPERATE_SEASONAL_FOREST,
-//	TEMPERATE_RAIN_FOREST,
-//	SUBTROPICAL_DESERT,
-//	SAVANNA,
-//	TROPICAL_RAINFOREST,
-//	BIOME_LAST
-//)
-
 class CBiomeHandler
 {
 public:
@@ -92,12 +77,16 @@ public:
 		std::vector<float>	  coverageMap;
 		std::vector<String>   meshes;
 		CPoissonMeshInstance* meshInstance;
+		float				  poissonRadius = 80.0f;
+		float				  minSize = 0.8f;
+		float				  maxSize = 8.0f;
 	};
 
-	std::array<BiomeVegetationDescription, static_cast<int>(Biomes::BIOME_LAST)> &GetBiomeVegetationDescriptions() 
-	{ 
-		return mBiomeVegetationDescriptions; 
-	}
+	//std::array<BiomeVegetationDescription, static_cast<int>(Biomes::BIOME_LAST)> &GetBiomeVegetationDescriptions() 
+	//{ 
+	//	return mBiomeVegetationDescriptions; 
+	//}
+	std::array<BiomeVegetationDescription, static_cast<int>(Biomes::BIOME_LAST)> mBiomeVegetationDescriptions;
 
 private:
 
@@ -112,7 +101,6 @@ private:
 	std::vector<float> mNormalisedHeightMap;
 	std::vector<float> mMoistureMap;
 
-	std::array<BiomeVegetationDescription, static_cast<int>(Biomes::BIOME_LAST)> mBiomeVegetationDescriptions;
 
 	// moisture map params
 	Real	mCycle = 1024;
@@ -123,6 +111,7 @@ private:
 	float   mPowerFactor = 2.0f;
 	int		mOctaves = 5;
 
-	Image* img;
+	std::array<Image, 3> mCovImages;
+	std::array<TexturePtr, 3>  mCovTextures;
 
 };

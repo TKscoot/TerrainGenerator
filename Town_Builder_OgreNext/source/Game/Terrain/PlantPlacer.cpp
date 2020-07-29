@@ -91,14 +91,15 @@ void CPlantPlacer::Initialize()
 
 	// BIOMES
 
-	mBiomeVegDescs = mBiomeHandler->GetBiomeVegetationDescriptions();
+	//mBiomeVegDescs = mBiomeHandler->GetBiomeVegetationDescriptions();
+	mBiomeVegDescs = mBiomeHandler->mBiomeVegetationDescriptions;
 
-	mBiomeVegDescs[0].meshes.push_back("fir05_30.mesh");
-	mBiomeVegDescs[0].meshes.push_back("fir06_30.mesh");
-	mBiomeVegDescs[0].meshes.push_back("fir14_25.mesh");
-	mBiomeVegDescs[1].meshes.push_back("plant1.mesh");
-	mBiomeVegDescs[2].meshes.push_back("farn1.mesh");
-	mBiomeVegDescs[3].meshes.push_back("shroom1_1.mesh");
+	//mBiomeVegDescs[0].meshes.push_back("fir05_30.mesh");
+	//mBiomeVegDescs[0].meshes.push_back("fir06_30.mesh");
+	//mBiomeVegDescs[0].meshes.push_back("fir14_25.mesh");
+	//mBiomeVegDescs[1].meshes.push_back("plant1.mesh");
+	//mBiomeVegDescs[2].meshes.push_back("farn1.mesh");
+	//mBiomeVegDescs[3].meshes.push_back("shroom1_1.mesh");
 
 	for (int i = 0; i < mBiomeVegDescs.size(); i++)
 	{
@@ -109,11 +110,11 @@ void CPlantPlacer::Initialize()
 			mTerrain,
 			false,
 			InstanceManager::HWInstancingVTF,
-			0.8f,
-			8.0f,
-			80.0f,
+			mBiomeVegDescs[i].minSize,
+			mBiomeVegDescs[i].maxSize,
+			mBiomeVegDescs[i].poissonRadius,
 			-1000.0f,
-			1000.0f,
+			2500.0f,
 			mBiomeVegDescs[i].coverageMap
 		);
 	}
@@ -143,19 +144,28 @@ void CPlantPlacer::Finalize()
 
 void CPlantPlacer::PlaceVegetation()
 {
+	for (int i = 0; i < mBiomeVegDescs.size(); i++)
+	{
+		mBiomeVegDescs[i].meshInstance->UpdateCoverageMap(mBiomeHandler->mBiomeVegetationDescriptions[i].coverageMap);
+	}
+
 	ClearVegetation();
 
 	//mInstancedGrass->PlaceEntities();
 	//mInstancedRocks->PlaceEntities();
 	//mTree->PlaceEntities();
 	//mFoliage->PlaceEntities();
-	mBiomeHandler->UpdateCoverageMap();
-	mBiomeVegDescs[0].meshInstance->PlaceEntities();
-	mBiomeVegDescs[1].meshInstance->PlaceEntities();
-	mBiomeVegDescs[2].meshInstance->PlaceEntities();
-	mBiomeVegDescs[3].meshInstance->PlaceEntities();
 
-	std::cout << "Placed vegetation at biome " << static_cast<Biomes>(0) << std::endl;
+	mBiomeVegDescs[3].meshInstance->PlaceEntities(); // hill shrubs
+	mBiomeVegDescs[4].meshInstance->PlaceEntities(); // shrubland
+	mBiomeVegDescs[5].meshInstance->PlaceEntities(); // forest
+	//mBiomeVegDescs[6].meshInstance->PlaceEntities(); // Autumn (Temperate_deciduous_forest)
+	mBiomeVegDescs[7].meshInstance->PlaceEntities(); // jungle
+	mBiomeVegDescs[8].meshInstance->PlaceEntities(); // desert cactus
+	mBiomeVegDescs[9].meshInstance->PlaceEntities();
+	mBiomeVegDescs[10].meshInstance->PlaceEntities(); // cactus
+	mBiomeVegDescs[11].meshInstance->PlaceEntities(); // grassland
+
 	//for (int i = 0; i < mBiomeVegDescs.size(); i++)
 	//{
 	//	mBiomeVegDescs[i].meshInstance->PlaceEntities();

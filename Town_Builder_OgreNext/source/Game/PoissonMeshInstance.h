@@ -148,6 +148,7 @@ public:
 	void ClearEntities();
 
 	bool Update(const FrameEvent& evt);
+	void UpdateCoverageMap(std::vector<float> coverageMap) { mCoverageMap = coverageMap; }
 
 
 
@@ -194,5 +195,5 @@ private:
 
 	bool  mUseCoverageMap;
 	float mCoverageThreshold = 1.0f;
-	std::vector<float> mCoverageMap;
+	std::vector<float> mCoverageMap = {};
 };

@@ -4,37 +4,209 @@ CBiomeHandler::CBiomeHandler(Terrain * terrain)
 						  : mTerrain(terrain)
 {
 	const uint16 terrainSize = mTerrain->getSize();
-
-	img = new Image();
-	img->load("DefaultCovMap.png", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
-
-	// Splat manager init
-	//mSplatMgr = new ET::SplattingManager("ETSplatting", "ET", terrainSize, terrainSize);
-	//mSplatMgr->setNumTextures(6);
-
-	float* map = mTerrain->getHeightData();
-
-	for (int i = 0; i < (terrainSize * terrainSize); i++)
+	
+	for (int i = 0; i < 3; i++)
 	{
-		mNormalisedHeightMap.push_back(map[i]);
+		mCovImages[i].load("DefaultCovMap.png", ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+
+		StringStream ss;
+		ss << "CovMap";
+		ss << i;
+		mCovTextures[i] = TextureManager::getSingletonPtr()->getByName(ss.str());
 	}
 
-	//mNormalisedHeightMap.assign(map, map + (terrainSize * terrainSize));
+	CalculateMoistureMap();
 
-	//float minValue = std::numeric_limits<float>::max();
-	//float maxValue = std::numeric_limits<float>::min();
-	//
-	//for (int i = 0; i < mNormalisedHeightMap.size(); i++)
-	//{
-	//	minValue = std::min(mNormalisedHeightMap[i], minValue);
-	//	maxValue = std::max(mNormalisedHeightMap[i], maxValue);
-	//}
-	//
-	//for (int i = 0; i < mNormalisedHeightMap.size(); i++)
-	//{
-	//	mNormalisedHeightMap[i] = (mNormalisedHeightMap[i] - minValue) / (maxValue - minValue);
-	//}
+	for (int i = 0; i < mBiomeVegetationDescriptions.size(); i++)
+	{
+		mBiomeVegetationDescriptions[i].coverageMap.resize(terrainSize*terrainSize);
 
+		// fill whole array with zeros
+		std::fill(
+			mBiomeVegetationDescriptions[i].coverageMap.begin(), 
+			mBiomeVegetationDescriptions[i].coverageMap.end(), 0);
+
+		mBiomeVegetationDescriptions[i].meshes.clear();
+	}
+
+	// Hill shrubs
+	mBiomeVegetationDescriptions[3].meshes.push_back("plant1.mesh");
+	mBiomeVegetationDescriptions[3].meshes.push_back("plant2.mesh");
+	mBiomeVegetationDescriptions[3].meshes.push_back("farn1.mesh");
+	mBiomeVegetationDescriptions[3].meshes.push_back("farn2.mesh");
+	mBiomeVegetationDescriptions[3].meshes.push_back("shroom1_1.mesh");
+	mBiomeVegetationDescriptions[3].meshes.push_back("shroom1_2.mesh");
+	mBiomeVegetationDescriptions[3].meshes.push_back("shroom1_3.mesh");
+	mBiomeVegetationDescriptions[3].meshes.push_back("shroom2_1.mesh");
+	mBiomeVegetationDescriptions[3].meshes.push_back("shroom2_2.mesh");
+	mBiomeVegetationDescriptions[3].meshes.push_back("shroom2_3.mesh");
+	mBiomeVegetationDescriptions[3].poissonRadius = 80.0f;
+	// Shrubland
+	mBiomeVegetationDescriptions[4].meshes = mBiomeVegetationDescriptions[3].meshes;
+	mBiomeVegetationDescriptions[4].poissonRadius = 40.0f;
+	// Forest
+	mBiomeVegetationDescriptions[5].meshes.push_back("fir05_30.mesh");
+	mBiomeVegetationDescriptions[5].meshes.push_back("fir06_30.mesh");
+	mBiomeVegetationDescriptions[5].meshes.push_back("fir14_25.mesh");
+	//Jungle
+	mBiomeVegetationDescriptions[7].meshes.push_back("fern_tree.mesh");
+	mBiomeVegetationDescriptions[7].poissonRadius = 280.0f;
+	mBiomeVegetationDescriptions[7].minSize = 0.75f;
+	mBiomeVegetationDescriptions[7].maxSize = 2.25f;
+	mBiomeVegetationDescriptions[9].meshes.push_back("fern_tree.mesh");
+	mBiomeVegetationDescriptions[9].poissonRadius = 280.0f;
+	mBiomeVegetationDescriptions[9].minSize = 0.75f;
+	mBiomeVegetationDescriptions[9].maxSize = 2.25f;
+	// Desert
+	mBiomeVegetationDescriptions[8].meshes.push_back("cactus.mesh");
+	mBiomeVegetationDescriptions[8].poissonRadius = 280.0f;
+	mBiomeVegetationDescriptions[8].minSize = 0.75f;
+	mBiomeVegetationDescriptions[8].maxSize = 3.25f;
+	mBiomeVegetationDescriptions[10].meshes.push_back("cactus.mesh");
+	mBiomeVegetationDescriptions[10].poissonRadius = 280.0f;
+	mBiomeVegetationDescriptions[10].minSize = 0.75f;
+	mBiomeVegetationDescriptions[10].maxSize = 3.25f;
+	// Grassland
+	mBiomeVegetationDescriptions[11].meshes.push_back("fir05_30.mesh");
+	mBiomeVegetationDescriptions[11].meshes.push_back("fir06_30.mesh");
+	mBiomeVegetationDescriptions[11].meshes.push_back("fir14_25.mesh");
+	mBiomeVegetationDescriptions[11].poissonRadius = 120.0f;
+
+
+
+											
+	std::array<int, (int)Biomes::BIOME_LAST> occurance = {};
+
+	for (int i = 0; i < terrainSize; i++)
+	{
+		for (int j = 0; j < terrainSize; j++)
+		{
+			Biomes biome = GetBiomeAtPoint(i, j);
+			occurance[static_cast<int>(biome)]++;
+			mBiomeVegetationDescriptions[static_cast<int>(biome)].coverageMap[i * terrainSize + j] = 1.0f;
+		}
+	}
+
+	for (int i = 0; i < occurance.size(); i++)
+	{
+		std::cout << "Biome " << static_cast<Biomes>(i) << " occupies " << occurance[i] << " terrain points" << std::endl;
+	}
+
+
+
+
+
+}
+
+Biomes CBiomeHandler::GetBiomeAtPoint(int x, int y)
+{
+	const uint16 terrainSize = mTerrain->getSize();
+	float* map = mTerrain->getHeightData();
+
+	float e = map[y * terrainSize + x];
+	float m = mMoistureMap[y * terrainSize + x];
+
+	if (e < 50)
+	{
+		  mCovImages[0].setColourAt(ColourValue(1.0f, 0.0f, 0.0f, 0.0f), x, y, 0);
+		return OCEAN;
+	}
+	if (e < 150)
+	{
+		  mCovImages[0].setColourAt(ColourValue(0.0f, 1.0f, 0.0f, 0.0f), x, y, 0);
+		return BEACH;
+	}
+
+
+	if (e > 2500)
+	{
+		  mCovImages[0].setColourAt(ColourValue(0.0f, 0.0f, 1.0f, 0.0f), x, y, 0);
+		return SNOW;
+	}
+
+	if (e > 800)
+	{
+		if (m < 0.15)
+		{
+			// Eventuell die cv vom pixel benutzen statt 0.0
+			//+ColourValue cv =   mCovImages[i].getColourAt(x, y, 0);
+			mCovImages[0].setColourAt(ColourValue(0.0f, 0.0f, 0.0f, 1.0f), x, y, 0);
+			return TEMPERATE_DESERT;
+		}
+		if (m < 0.33)
+		{
+			mCovImages[1].setColourAt(ColourValue(1.0f, 0.0f, 0.0f, 0.0f), x, y, 0);
+			return SHRUBLAND;
+		}
+
+		if (m < 0.66)
+		{
+			mCovImages[1].setColourAt(ColourValue(0.0f, 1.0f, 0.0f, 0.0f), x, y, 0);
+			return TAIGA;
+		}
+
+		mCovImages[1].setColourAt(ColourValue(0.0f, 0.0f, 0.0f, 1.0f), x, y, 0);
+		return TEMPERATE_DECIDUOUS_FOREST;
+	}
+
+	if (e > 400)
+	{
+		if (m < 0.16)
+		{ 
+			mCovImages[0].setColourAt(ColourValue(0.0f, 0.0f, 0.0f, 1.0f), x, y, 0);
+			return TEMPERATE_DESERT;				 
+		}
+		if (m < 0.50)
+		{ 
+			mCovImages[1].setColourAt(ColourValue(0.0f, 0.0f, 1.0f, 0.0f), x, y, 0);
+			return GRASSLAND;					 
+		}
+		if (m < 0.83)
+		{ 
+			mCovImages[1].setColourAt(ColourValue(0.0f, 0.0f, 0.0f, 1.0f), x, y, 0);
+			return TEMPERATE_DECIDUOUS_FOREST;	 
+		}
+
+		mCovImages[2].setColourAt(ColourValue(1.0f, 0.0f, 0.0f, 0.0f), x, y, 0);
+		return TEMPERATE_RAIN_FOREST;
+	}
+
+	if (m < 0.16)
+	{
+		mCovImages[2].setColourAt(ColourValue(0.0f, 1.0f, 0.0f, 0.0f), x, y, 0);
+		return SUBTROPICAL_DESERT;
+	}
+	if (m < 0.33)
+	{
+		mCovImages[1].setColourAt(ColourValue(0.0f, 0.0f, 1.0f, 0.0f), x, y, 0);
+		return GRASSLAND;
+	}
+	if (m < 0.66)
+	{
+		mCovImages[2].setColourAt(ColourValue(0.0f, 0.0f, 1.0f, 0.0f), x, y, 0);
+		return TROPICAL_SEASONAL_FOREST;
+	}
+
+	mCovImages[2].setColourAt(ColourValue(0.0f, 0.0f, 0.0f, 1.0f), x, y, 0);
+	return TROPICAL_RAIN_FOREST;
+}
+
+void CBiomeHandler::UpdateCoverageMap()
+{
+	const uint16 terrainSize = mTerrain->getSize();
+
+	for (int x = 0; x < terrainSize; x++)
+	{
+		for (int y = 0; y < terrainSize; y++)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				mCovImages[i].setColourAt(ColourValue(0.0f, 0.0f, 0.0f, 0.0f), x, y, 0);
+			}
+		}
+	}
+
+	mMoistureMap.clear();
 	CalculateMoistureMap();
 
 	// DEBUG!
@@ -45,7 +217,7 @@ CBiomeHandler::CBiomeHandler(Terrain * terrain)
 
 		// fill whole array with zeros
 		std::fill(
-			mBiomeVegetationDescriptions[i].coverageMap.begin(), 
+			mBiomeVegetationDescriptions[i].coverageMap.begin(),
 			mBiomeVegetationDescriptions[i].coverageMap.end(), 0);
 	}
 
@@ -66,82 +238,25 @@ CBiomeHandler::CBiomeHandler(Terrain * terrain)
 	{
 		std::cout << "Biome " << static_cast<Biomes>(i) << " occupies " << occurance[i] << " terrain points" << std::endl;
 	}
-
-	img->save("media/materials/textures/CovMap1.png");
-
-}
-
-Biomes CBiomeHandler::GetBiomeAtPoint(int x, int y)
-{
-	const uint16 terrainSize = mTerrain->getSize();
-
-	float e = mNormalisedHeightMap[y * terrainSize + x];
-	float m = mMoistureMap[y * terrainSize + x];
-
-	if (e < 50)
+	
+	for (int i = 0; i < 3; i++)
 	{
-		img->setColourAt(ColourValue(1.0f, 0.0f, 0.0f), x, y, 0);
-		return OCEAN;
-	}
-	if (e < 70)
-	{
-		img->setColourAt(ColourValue(0.0f, 1.0f, 0.0f), x, y, 0);
-		return BEACH;
+		mCovImages[i].flipAroundX();
+
+		mCovTextures[i]->loadImage(mCovImages[i]);
+
+		HardwarePixelBufferSharedPtr pixelBuffer = mCovTextures[i]->getBuffer();
+		//pixelBuffer->lock(HardwareBuffer::LockOptions::HBL_NORMAL);
+		pixelBuffer->blitFromMemory(mCovImages[i].getPixelBox());
+		pixelBuffer->unlock();
 	}
 
-	if (e > 800)
-	{
-		img->setColourAt(ColourValue(0.0f, 0.0f, 1.0f), x, y, 0);
-		return SNOW;
-	}
 
-	if (e > 600)
-	{
-		ColourValue cv = img->getColourAt(x, y, 0);
-		img->setColourAt(ColourValue(cv.r, cv.g, cv.b, 0.0f), x, y, 0);
-
-		if (m < 0.33) return TEMPERATE_DESERT;
-		if (m < 0.66) return SHRUBLAND;
-		return TAIGA;
-	}
-
-	if (e > 300)
-	{
-		if (m < 0.16) return TEMPERATE_DESERT;
-		if (m < 0.50) return GRASSLAND;
-		if (m < 0.83) return TEMPERATE_DECIDUOUS_FOREST;
-		return TEMPERATE_RAIN_FOREST;
-	}
-
-	if (m < 0.16) return SUBTROPICAL_DESERT;
-	if (m < 0.33) return GRASSLAND;
-	if (m < 0.66) return TROPICAL_SEASONAL_FOREST;
-
-	return TROPICAL_RAIN_FOREST;
-}
-
-void CBiomeHandler::UpdateCoverageMap()
-{
-	const uint16 terrainSize = mTerrain->getSize();
-	float* map = mTerrain->getHeightData();
-
-	for (int i = 0; i < (terrainSize * terrainSize); i++)
-	{
-		mNormalisedHeightMap.push_back(map[i]);
-	}
-
-	for (int i = 0; i < terrainSize; i++)
-	{
-		for (int j = 0; j < terrainSize; j++)
-		{
-			Biomes biome = GetBiomeAtPoint(i, j);
-			mBiomeVegetationDescriptions[static_cast<int>(biome)].coverageMap[i * terrainSize + j] = 1.0f;
-		}
-	}
 }
 
 void CBiomeHandler::CalculateMoistureMap()
 {
+	SimplexNoise::createPermutations(rand() % 10000);
 	const uint16 terrainSize = mTerrain->getSize();
 	Vector2 worldOffset = mOriginPoint;
 	Vector2 revisedValuePoint = Vector2::ZERO;
