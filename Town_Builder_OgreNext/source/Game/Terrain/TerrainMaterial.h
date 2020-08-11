@@ -12,42 +12,26 @@ class TerrainMaterial : public Ogre::TerrainMaterialGeneratorA
 {
 public:
 
-	TerrainMaterial(Ogre::String materialName, bool addNormalmap = true, bool cloneMaterial = true);
+	TerrainMaterial(Ogre::String materialName);
 
 	void setMaterialByName(const Ogre::String materialName);
-	void addNormalMapOnGenerate(bool set) { mAddNormalMap = set; };
-	void cloneMaterialOnGenerate(bool set) { mCloneMaterial = set; };
-
 	Ogre::String getMaterialName() { return mMaterialName; };
 
+	// Use SM2Profile as Template for own Terrain Material Profile
 	class SM2ProfileA : public Ogre::TerrainMaterialGeneratorA::SM2Profile
 	{
 	public:
 		SM2ProfileA(Ogre::TerrainMaterialGenerator* parent, const Ogre::String& name, const Ogre::String& desc);
 		virtual ~SM2ProfileA();
 
-		//bool isVertexCompressionSupported() const { return false; }
-
+		// overridden methods
 		Ogre::MaterialPtr generate(const Ogre::Terrain* terrain) override;
-
-		//Ogre::MaterialPtr generateForCompositeMap(const Ogre::Terrain* terrain);
-		//
-		//Ogre::uint8 getMaxLayers(const Ogre::Terrain* terrain) const;
-		//
-		//void updateParams(const Ogre::MaterialPtr& mat, const Ogre::Terrain* terrain);
-		//
-		//void updateParamsForCompositeMap(const Ogre::MaterialPtr& mat, const Ogre::Terrain* terrain);
-		//
-		//void requestOptions(Ogre::Terrain* terrain);
-		//
-		//virtual void setLightmapEnabled(bool enabled);
+		void requestOptions(Ogre::Terrain* terrain);
 
 
 	};
 
 protected:
 	Ogre::String mMaterialName;
-	bool mCloneMaterial;
-	bool mAddNormalMap;
 };
 

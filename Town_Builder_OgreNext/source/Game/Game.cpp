@@ -10,8 +10,6 @@ CGame::CGame() : ApplicationContext("Town Builder")
 
 CGame::~CGame()
 {
-	delete mModelPlacer;
-	mModelPlacer = nullptr;
 	delete mPlantPlacer;
 	mPlantPlacer = nullptr;
 
@@ -27,6 +25,7 @@ CGame::~CGame()
 	mInputMgr->destroy();
 	delete mInputMgr;
 	mInputMgr = nullptr;
+
 }
 
 void CGame::Setup()
@@ -37,16 +36,19 @@ void CGame::Setup()
 
 	// Set Root and Window pointers
 	mRoot = ApplicationContext::getRoot();
-	//mRoot->loadPlugin("Plugin_CgProgramManager");
+
+	// Create Window
 	mWindow = ApplicationContext::getRenderWindow();
 	WindowEventUtilities::addWindowEventListener(mWindow, this);
 
+	// Create Scene Manager
 	SceneManager* sceneManager = mRoot->createSceneManager();
 
 	// Gui listener
 	sceneManager->addRenderQueueListener(getOverlaySystem());
 
 	mWindow->setVSyncEnabled(false);
+
 	// Add Frame events using methods or lambdas
 	CEventHandler::GetSingletonPtr()->AddFrameStartedCallback(std::bind(&CGame::Update, this, std::placeholders::_1));
 	CEventHandler::GetSingletonPtr()->AddFrameEndedCallback([](const FrameEvent& evt) -> bool 
@@ -69,7 +71,7 @@ void CGame::Setup()
 	mWindow->getViewport(0)->setBackgroundColour(fadeColour);
 	mWindow->getViewport(0)->setMaterialScheme(RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
 
-	//Init RTSS
+	// Init RTSS
 	InitializeShaderGenerator(sceneManager);
 
 	// Create InputManager instance and initialise it
@@ -91,13 +93,13 @@ void CGame::Setup()
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/scripts", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/materials/textures/nvidia", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/skyboxes/sunnytropic", "FileSystem");
-	//ResourceGroupManager::getSingleton().addResourceLocation("media/trees", "FileSystem");
-	//ResourceGroupManager::getSingleton().addResourceLocation("media/trees2/", "FileSystem");
 	ResourceGroupManager::getSingleton().addResourceLocation("media/imgui/resources", "FileSystem", Ogre::ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME);
 
+	// Load and initialise all assets
 	ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 	
 
+	// Setup Shadows
 	MaterialPtr casterMat = MaterialManager::getSingletonPtr()->getByName("Ogre/shadow/depth/caster");
 
 	sceneManager->setShadowFarDistance(3000);
@@ -114,23 +116,6 @@ void CGame::Setup()
 
 	// Set up caster material - this is just a standard (RTSS compatible) depth/shadow map caster
 	sceneManager->setShadowTextureCasterMaterial(casterMat);
-
-	// shadow camera setup
-	//Ogre::PSSMShadowCameraSetup* pssmSetup = new Ogre::PSSMShadowCameraSetup();
-	//if (mPssmSetup)
-	//delete mPssmSetup;
-	//mPssmSetup = pssmSetup;
-	//
-	//mPssmSetup->calculateSplitPoints(3, 0.1, sceneManager->getShadowFarDistance());    // Calculate 3 split points (PSSM 3)
-	//
-	//// Increase near distance when experiencing artifacts
-	//mPssmSetup->setSplitPadding(0.1);
-	//mPssmSetup->setOptimalAdjustFactor(0, 2);
-	//mPssmSetup->setOptimalAdjustFactor(1, 1);
-	//mPssmSetup->setOptimalAdjustFactor(2, 0.5);
-	//
-	//sceneManager->setShadowCameraSetup(Ogre::ShadowCameraSetupPtr(mPssmSetup));
-	
 	
 	// Load and apply Skybox
 	sceneManager->setSkyBox(true, "Examples/CloudyNoonSkyBox", 50000, true);
@@ -138,11 +123,8 @@ void CGame::Setup()
 	// Create Light
 	Light* light1 = sceneManager->createLight("Light1");
 	light1->setType(Ogre::Light::LT_POINT);
-	// Set Light Color
 	light1->setDiffuseColour(1.0f, 1.0f, 1.0f);
-	// Set Light Reflective Color
 	light1->setSpecularColour(1.0f, 1.0f, 1.0f);
-	// Set Light (Range, Brightness, Fade Speed, Rapid Fade Speed)
 	light1->setAttenuation(10, 0.5, 0.045, 0.0);
 	
 	// Create light Entity
@@ -164,11 +146,9 @@ void CGame::Setup()
 	addInputListener(mImguiListener.get());
 	mListenerChain = InputListenerChain({ mImguiListener.get() });
 	
+	// Create Terrain
 	mTerrain = new CTerrain(sceneManager);
 	mTerrain->Initialize(mPssmSetup);
-	
-	// Creating Model & Plant placing Instances
-	mModelPlacer = new CModelPlacer(sceneManager, mTerrain);
 
 	// Water
 	Entity *pWaterEntity;
@@ -214,6 +194,7 @@ bool CGame::Update(const FrameEvent &evt)
 	// Debug Gui for FPS and Geometry stats
 	RenderTarget::FrameStats stats = mWindow->getStatistics();
 
+
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
 	ImGui::SetNextWindowSize(ImVec2(400, mWindow->getHeight()));
 	ImGui::Begin("", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
@@ -227,12 +208,12 @@ bool CGame::Update(const FrameEvent &evt)
 		{
 			exit(0);
 		}
+
 		ImGui::EndChild();
 	}
 	ImGui::Spacing();
 
-
-
+	// Update water flow
 	float fWaterFlow = 0.4f * evt.timeSinceLastFrame;
 	static float fFlowAmount = 0.0f;
 	static bool fFlowUp = true;
@@ -251,8 +232,6 @@ bool CGame::Update(const FrameEvent &evt)
 	
 		pWaterNode->translate(0, (fFlowUp ? fWaterFlow : -fWaterFlow), 0);
 	}
-
-
 
 	return true;
 }
@@ -308,13 +287,7 @@ bool CGame::InitializeShaderGenerator(SceneManager * sceneMgr)
 		// Set shader cache path.
 		shaderGenerator->setShaderCachePath(shaderCachePath);
 
-		// Create and register the material manager listener.
-		ShaderGeneratorTechniqueResolverListener* materialMgrListener = new ShaderGeneratorTechniqueResolverListener(shaderGenerator);
-		Ogre::MaterialManager::getSingleton().addListener(materialMgrListener);
-
-
-
-				// Add a specialized sub-render (per-pixel lighting) state to the default scheme render state
+		// Add a specialized sub-render (per-pixel lighting) state to the default scheme render state
 		Ogre::RTShader::RenderState* pMainRenderState = 
 			mShaderGenerator->createOrRetrieveRenderState(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME).first;
 		pMainRenderState->reset();

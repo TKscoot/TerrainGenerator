@@ -10,8 +10,6 @@ void CPoissonMeshInstance::SetupInstanceManager()
 	{
 		std::cout << "Instancing technique not supported by GPU! Falling back to standard Entity Creation." << std::endl;
 		
-		//TODO Non-instancing
-		//createEntities();
 		mCurrentManager = 0;
 		mUseInstancing = false;
 		return;
@@ -42,32 +40,37 @@ void CPoissonMeshInstance::PlaceEntities()
 
 bool CPoissonMeshInstance::Update(const FrameEvent & evt)
 {
-	std::string tabLabel = "PoissonInstancing " + mMeshName;
-	if (ImGui::CollapsingHeader(tabLabel.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+
+	if (mMeshName.empty())
 	{
-		ImGui::BeginChild(tabLabel.c_str(), ImVec2(0, 181), true);
-		ImGui::SliderFloat("Radius", &mPoissonRadius, 20.0f, 500.0f);
-		ImGui::SliderFloat("Min height", &mMinHeight, 0.0f, 1000.0f);
-		ImGui::SliderFloat("Max height", &mMaxHeight, 0.0f, 1000.0f);
-		ImGui::Spacing();
-		ImGui::SliderFloat("Min scale", &mMinScale, 0.0f, 100.0f);
-		ImGui::SliderFloat("Max scale", &mMaxScale, 0.0f, 100.0f);
-		ImGui::Spacing();
-		std::string placingLabel = "Place " + mMeshName;
-		if (ImGui::Button(placingLabel.c_str()))
-		{
-			ClearEntities();
-			PlaceEntities();
-		}
-
-		std::string clearingLabel = "Clear " + mMeshName;
-		if (ImGui::Button(clearingLabel.c_str()))
-		{
-			ClearEntities();
-		}
-
-		ImGui::EndChild();
+		return true;
 	}
+	std::string tabLabel = "PoissonInstancing " + mMeshName;
+	//if (ImGui::CollapsingHeader(tabLabel.c_str(), ImGuiTreeNodeFlags_None))
+	//{
+	//	ImGui::BeginChild(tabLabel.c_str(), ImVec2(0, 181), true);
+	//	ImGui::SliderFloat("Radius", &mPoissonRadius, 20.0f, 500.0f);
+	//	ImGui::SliderFloat("Min height", &mMinHeight, 0.0f, 1000.0f);
+	//	ImGui::SliderFloat("Max height", &mMaxHeight, 0.0f, 1000.0f);
+	//	ImGui::Spacing();
+	//	ImGui::SliderFloat("Min scale", &mMinScale, 0.0f, 100.0f);
+	//	ImGui::SliderFloat("Max scale", &mMaxScale, 0.0f, 100.0f);
+	//	ImGui::Spacing();
+	//	std::string placingLabel = "Place " + mMeshName;
+	//	if (ImGui::Button(placingLabel.c_str()))
+	//	{
+	//		ClearEntities();
+	//		PlaceEntities();
+	//	}
+	//
+	//	std::string clearingLabel = "Clear " + mMeshName;
+	//	if (ImGui::Button(clearingLabel.c_str()))
+	//	{
+	//		ClearEntities();
+	//	}
+	//
+	//	ImGui::EndChild();
+	//}
 
 	return true;
 }
@@ -92,9 +95,9 @@ void CPoissonMeshInstance::CreateInstancedEntities()
 		height = mTerrain->getHeightAtWorldPosition(Vector3(sample[0], 0, sample[1]));
 		Vector3 terrainPos = Vector3::ZERO;
 		mTerrain->convertPosition(Terrain::WORLD_SPACE, Vector3(sample[0], height, sample[1]), Terrain::POINT_SPACE, terrainPos);
-		//std::cout << "worldPos: " << Vector3(sample[0], height, sample[1]) << " terrainPoint: " << terrainPos << std::endl;
 		position = Vector3(sample[0], height, sample[1]);
 		scale = Math::RangeRandom(mMinScale, mMaxScale);
+		
 		bool shouldPlace = false;
 		int coverageMapSize = sqrt(mCoverageMap.size());
 		if (mUseCoverageMap)
@@ -150,11 +153,14 @@ void CPoissonMeshInstance::CreateNonInstancedEntities()
 	for (auto& sample : samples)
 	{
 		height = mTerrain->getHeightAtWorldPosition(Vector3(sample[0], 0, sample[1]));
+
 		Vector3 terrainPos = Vector3::ZERO;
 		mTerrain->convertPosition(Terrain::WORLD_SPACE, Vector3(sample[0], height, sample[1]), Terrain::POINT_SPACE, terrainPos);
 		position = Vector3(sample[0], height, sample[1]);
 		scale = Math::RangeRandom(mMinScale, mMaxScale);
+
 		bool shouldPlace = false;
+
 		int coverageMapSize = sqrt(mCoverageMap.size());
 		if (mUseCoverageMap)
 		{

@@ -147,6 +147,15 @@ public:
 	void PlaceEntities();
 	void ClearEntities();
 
+	void UpdateParameters(float minScale = 0.01f,
+		float maxScale = 10.0f,
+		float poissonRadius = 80.0f)
+	{
+		mMinScale = minScale;
+		mMaxScale = maxScale;
+		mPoissonRadius = poissonRadius;
+	}
+
 	bool Update(const FrameEvent& evt);
 	void UpdateCoverageMap(std::vector<float> coverageMap) { mCoverageMap = coverageMap; }
 
@@ -162,8 +171,8 @@ private:
 	void SetupInstanceManager();
 	void DestroyManagers();
 	void DefragmentBatches();
-	void TestCapabilities(const RenderSystemCapabilities* caps);
 
+	void TestCapabilities(const RenderSystemCapabilities* caps);
 	//The difference between testCapabilities() is that features checked here aren't fatal errors.
 	//which means the sample can run (with limited functionality) on those computers
 	void CheckHardwareSupport();

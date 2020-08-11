@@ -29,6 +29,8 @@ CBiomeHandler::CBiomeHandler(Terrain * terrain)
 		mBiomeVegetationDescriptions[i].meshes.clear();
 	}
 
+	// Setting meshes to use for different biomes
+
 	// Hill shrubs
 	mBiomeVegetationDescriptions[3].meshes.push_back("plant1.mesh");
 	mBiomeVegetationDescriptions[3].meshes.push_back("plant2.mesh");
@@ -71,9 +73,6 @@ CBiomeHandler::CBiomeHandler(Terrain * terrain)
 	mBiomeVegetationDescriptions[11].meshes.push_back("fir06_30.mesh");
 	mBiomeVegetationDescriptions[11].meshes.push_back("fir14_25.mesh");
 	mBiomeVegetationDescriptions[11].poissonRadius = 120.0f;
-
-
-
 											
 	std::array<int, (int)Biomes::BIOME_LAST> occurance = {};
 
@@ -91,11 +90,6 @@ CBiomeHandler::CBiomeHandler(Terrain * terrain)
 	{
 		std::cout << "Biome " << static_cast<Biomes>(i) << " occupies " << occurance[i] << " terrain points" << std::endl;
 	}
-
-
-
-
-
 }
 
 Biomes CBiomeHandler::GetBiomeAtPoint(int x, int y)
@@ -106,21 +100,22 @@ Biomes CBiomeHandler::GetBiomeAtPoint(int x, int y)
 	float e = map[y * terrainSize + x];
 	float m = mMoistureMap[y * terrainSize + x];
 
+	// setting specific channel of coverage images to 1 for shader use
 	if (e < 50)
 	{
-		  mCovImages[0].setColourAt(ColourValue(1.0f, 0.0f, 0.0f, 0.0f), x, y, 0);
+		mCovImages[0].setColourAt(ColourValue(1.0f, 0.0f, 0.0f, 0.0f), x, y, 0);
 		return OCEAN;
 	}
 	if (e < 150)
 	{
-		  mCovImages[0].setColourAt(ColourValue(0.0f, 1.0f, 0.0f, 0.0f), x, y, 0);
+		mCovImages[0].setColourAt(ColourValue(0.0f, 1.0f, 0.0f, 0.0f), x, y, 0);
 		return BEACH;
 	}
 
 
 	if (e > 2500)
 	{
-		  mCovImages[0].setColourAt(ColourValue(0.0f, 0.0f, 1.0f, 0.0f), x, y, 0);
+		mCovImages[0].setColourAt(ColourValue(0.0f, 0.0f, 1.0f, 0.0f), x, y, 0);
 		return SNOW;
 	}
 
@@ -128,8 +123,6 @@ Biomes CBiomeHandler::GetBiomeAtPoint(int x, int y)
 	{
 		if (m < 0.15)
 		{
-			// Eventuell die cv vom pixel benutzen statt 0.0
-			//+ColourValue cv =   mCovImages[i].getColourAt(x, y, 0);
 			mCovImages[0].setColourAt(ColourValue(0.0f, 0.0f, 0.0f, 1.0f), x, y, 0);
 			return TEMPERATE_DESERT;
 		}
@@ -195,6 +188,7 @@ void CBiomeHandler::UpdateCoverageMap()
 {
 	const uint16 terrainSize = mTerrain->getSize();
 
+	// reset all coverage maps
 	for (int x = 0; x < terrainSize; x++)
 	{
 		for (int y = 0; y < terrainSize; y++)
@@ -208,8 +202,6 @@ void CBiomeHandler::UpdateCoverageMap()
 
 	mMoistureMap.clear();
 	CalculateMoistureMap();
-
-	// DEBUG!
 
 	for (int i = 0; i < mBiomeVegetationDescriptions.size(); i++)
 	{
@@ -234,6 +226,7 @@ void CBiomeHandler::UpdateCoverageMap()
 		}
 	}
 
+	// logging
 	for (int i = 0; i < occurance.size(); i++)
 	{
 		std::cout << "Biome " << static_cast<Biomes>(i) << " occupies " << occurance[i] << " terrain points" << std::endl;
@@ -246,16 +239,14 @@ void CBiomeHandler::UpdateCoverageMap()
 		mCovTextures[i]->loadImage(mCovImages[i]);
 
 		HardwarePixelBufferSharedPtr pixelBuffer = mCovTextures[i]->getBuffer();
-		//pixelBuffer->lock(HardwareBuffer::LockOptions::HBL_NORMAL);
 		pixelBuffer->blitFromMemory(mCovImages[i].getPixelBox());
 		pixelBuffer->unlock();
 	}
-
-
 }
 
 void CBiomeHandler::CalculateMoistureMap()
 {
+	// using simplex noise to calculate moisture for all terrain points
 	SimplexNoise::createPermutations(rand() % 10000);
 	const uint16 terrainSize = mTerrain->getSize();
 	Vector2 worldOffset = mOriginPoint;
@@ -281,8 +272,6 @@ void CBiomeHandler::CalculateMoistureMap()
 				heightScale = heightScale * 0.5f;
 				frequency = frequency * 2.0f;
 			}
-
-			//e = std::pow(e, mPowerFactor);
 
 			mMoistureMap.push_back(e);
 		}

@@ -8,98 +8,8 @@ void CPlantPlacer::Initialize()
 	HeightFunction::initialize(mTerrain);
 	CreateGrassMesh();
 
-	mInstancedGrass = new CPoissonMeshInstance(
-		mSceneManager,
-		"grass",
-		"Examples/Instancing/VTF/Grass",
-		mTerrain,
-		true,
-		InstanceManager::InstancingTechnique::TextureVTF,
-		0.2f,
-		1.5f);
-
-	int terrainSize = mTerrain->getSize();
-	std::vector<float> covMap;
-	for (int x = 0; x < terrainSize; x++)
-	{
-		for (int y = 0; y < terrainSize; y++)
-		{
-			covMap.push_back(SimplexNoise::noise(x, y));
-		}
-	}
-
-	mInstancedRocks = new CPoissonMeshInstance(
-		mSceneManager,
-		"Rock3.mesh",
-		"Examples/Instancing/VTF/HW/Rock3",
-		mTerrain,
-		true,
-		InstanceManager::HWInstancingVTF,
-		0.5f,
-		8.5f,
-		120.0f,
-		400.0f,
-		8000.0f,
-		covMap,
-		0.8f);
-
-	std::vector<String> treeArray;
-	treeArray.push_back("fir05_30.mesh");
-	treeArray.push_back("fir06_30.mesh");
-	treeArray.push_back("fir14_25.mesh");
-
-	mTree = new CPoissonMeshInstance(
-		mSceneManager,
-		treeArray,
-		"placeholder",
-		mTerrain,
-		false,
-		InstanceManager::HWInstancingVTF,
-		0.7f,
-		1.8f,
-		80.0f,
-		60.0f,
-		700.0f,
-		covMap,
-		0.8f);
-
-	std::vector<String> foliageArray;
-	foliageArray.push_back("plant1.mesh");
-	foliageArray.push_back("plant2.mesh");
-	foliageArray.push_back("farn1.mesh");
-	foliageArray.push_back("farn2.mesh");
-	foliageArray.push_back("shroom1_1.mesh");
-	foliageArray.push_back("shroom1_2.mesh");
-	foliageArray.push_back("shroom1_3.mesh");
-	foliageArray.push_back("shroom2_1.mesh");
-	foliageArray.push_back("shroom2_2.mesh");
-	foliageArray.push_back("shroom2_3.mesh");
-
-	mFoliage = new CPoissonMeshInstance(
-		mSceneManager,
-		foliageArray,
-		"placeholder",
-		mTerrain,
-		false,
-		InstanceManager::HWInstancingVTF,
-		0.7f,
-		5.4f,
-		80.0f,
-		50.0f,
-		850.0f);
-
-
-	// BIOMES
-
-	//mBiomeVegDescs = mBiomeHandler->GetBiomeVegetationDescriptions();
+	// Biome Vegetation
 	mBiomeVegDescs = mBiomeHandler->mBiomeVegetationDescriptions;
-
-	//mBiomeVegDescs[0].meshes.push_back("fir05_30.mesh");
-	//mBiomeVegDescs[0].meshes.push_back("fir06_30.mesh");
-	//mBiomeVegDescs[0].meshes.push_back("fir14_25.mesh");
-	//mBiomeVegDescs[1].meshes.push_back("plant1.mesh");
-	//mBiomeVegDescs[2].meshes.push_back("farn1.mesh");
-	//mBiomeVegDescs[3].meshes.push_back("shroom1_1.mesh");
 
 	for (int i = 0; i < mBiomeVegDescs.size(); i++)
 	{
@@ -119,27 +29,76 @@ void CPlantPlacer::Initialize()
 		);
 	}
 
+	for (int i = 0; i < mBiomeVegDescs.size(); i++)
+	{
+		if (mBiomeVegDescs[i].meshes.empty())
+		{
+			mBiomeNames.push_back("No Mesh");
 
+		}
+		else
+		{
+			mBiomeNames.push_back(mBiomeVegDescs[i].meshes[0].c_str());
+		}
+	}
 
 }
 
 void CPlantPlacer::Finalize()
 {
-	mInstancedGrass->ClearEntities();
-	delete mInstancedGrass;
-	mInstancedGrass = nullptr;
+	// Delete all mesh instances
+	for (int i = 0; i < mBiomeVegDescs.size(); i++)
+	{
+		delete mBiomeVegDescs[i].meshInstance;
+		mBiomeVegDescs[i].meshInstance = nullptr;
+	}
+}
 
-	mInstancedRocks->ClearEntities();
-	delete mInstancedRocks;
-	mInstancedRocks = nullptr;
+bool CPlantPlacer::Update(const FrameEvent &evt)
+{
+	static int selectedItem = 0;
+	if (ImGui::CollapsingHeader("Vegetation", ImGuiTreeNodeFlags_DefaultOpen))
+	{
 
-	mTree->ClearEntities();
-	delete mTree;
-	mTree = nullptr;
+		ImGui::Combo("Biomes", &selectedItem, mBiomeNames.data(), mBiomeNames.size());
 
-	mFoliage->ClearEntities();
-	delete mFoliage;
-	mFoliage = nullptr;
+		ImGui::BeginChild(mBiomeNames[selectedItem], ImVec2(0, 136), true);
+		if (mBiomeNames[selectedItem] != "No Mesh")
+		{
+			ImGui::SliderFloat("Radius",    &mBiomeVegDescs[selectedItem].poissonRadius, 20.0f, 500.0f);
+			ImGui::SliderFloat("Min scale", &mBiomeVegDescs[selectedItem].minSize,        0.0f, 100.0f);
+			ImGui::SliderFloat("Max scale", &mBiomeVegDescs[selectedItem].maxSize,        0.0f, 100.0f);
+			ImGui::Spacing();
+
+			if (ImGui::Button("Place meshes"))
+			{
+				mBiomeVegDescs[selectedItem].meshInstance->UpdateParameters(
+					mBiomeVegDescs[selectedItem].minSize,
+					mBiomeVegDescs[selectedItem].maxSize,
+					mBiomeVegDescs[selectedItem].poissonRadius);
+
+				for (int i = 0; i < mBiomeVegDescs.size(); i++)
+				{
+					mBiomeVegDescs[i].meshInstance->UpdateCoverageMap(mBiomeHandler->mBiomeVegetationDescriptions[i].coverageMap);
+				}
+
+				mBiomeVegDescs[selectedItem].meshInstance->ClearEntities();
+				mBiomeVegDescs[selectedItem].meshInstance->PlaceEntities();
+			}
+
+			if (ImGui::Button("Clear meshes"))
+			{
+				mBiomeVegDescs[selectedItem].meshInstance->ClearEntities();
+			}
+		}
+		else
+		{
+			ImGui::Text("No meshes to place for this biome!");
+		}
+
+		ImGui::EndChild();
+	}
+	return true;
 }
 
 void CPlantPlacer::PlaceVegetation()
@@ -151,34 +110,18 @@ void CPlantPlacer::PlaceVegetation()
 
 	ClearVegetation();
 
-	//mInstancedGrass->PlaceEntities();
-	//mInstancedRocks->PlaceEntities();
-	//mTree->PlaceEntities();
-	//mFoliage->PlaceEntities();
-
 	mBiomeVegDescs[3].meshInstance->PlaceEntities(); // hill shrubs
 	mBiomeVegDescs[4].meshInstance->PlaceEntities(); // shrubland
 	mBiomeVegDescs[5].meshInstance->PlaceEntities(); // forest
-	//mBiomeVegDescs[6].meshInstance->PlaceEntities(); // Autumn (Temperate_deciduous_forest)
 	mBiomeVegDescs[7].meshInstance->PlaceEntities(); // jungle
 	mBiomeVegDescs[8].meshInstance->PlaceEntities(); // desert cactus
 	mBiomeVegDescs[9].meshInstance->PlaceEntities();
 	mBiomeVegDescs[10].meshInstance->PlaceEntities(); // cactus
 	mBiomeVegDescs[11].meshInstance->PlaceEntities(); // grassland
-
-	//for (int i = 0; i < mBiomeVegDescs.size(); i++)
-	//{
-	//	mBiomeVegDescs[i].meshInstance->PlaceEntities();
-	//}
 }
 
 void CPlantPlacer::ClearVegetation()
 {
-	mInstancedGrass->ClearEntities();
-	mInstancedRocks->ClearEntities();
-	mTree->ClearEntities();
-	mFoliage->ClearEntities();
-
 	for (int i = 0; i < mBiomeVegDescs.size(); i++)
 	{
 		mBiomeVegDescs[i].meshInstance->ClearEntities();
@@ -197,11 +140,6 @@ void CPlantPlacer::CreateGrassMesh()
 	sm->vertexData->vertexStart = 0;
 	sm->vertexData->vertexCount = 12;
 	sm->indexData->indexCount = 18;
-
-#if defined(INCLUDE_RTSHADER_SYSTEM)
-	MaterialPtr grassMat = MaterialManager::getSingleton().getByName("Examples/Instancing/VTF/Grass");
-	grassMat->getTechnique(0)->setSchemeName(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
-#endif
 
 	// specify a vertex format declaration for our mesh: 3 floats for position, 3 floats for normal, 2 floats for UV
 	VertexDeclaration* decl = sm->vertexData->vertexDeclaration;

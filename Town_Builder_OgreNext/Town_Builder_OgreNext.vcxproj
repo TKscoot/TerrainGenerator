@@ -40,25 +40,11 @@
     <ClCompile Include="source\Game\PoissonMeshInstance.cpp" />
     <ClCompile Include="source\Game\Terrain\BiomeHandler.cpp" />
     <ClCompile Include="source\Game\Terrain\HydraulicErosion.cpp" />
-    <ClCompile Include="source\Game\Terrain\ModelPlacer.cpp" />
     <ClCompile Include="source\Game\Terrain\PlantPlacer.cpp" />
     <ClCompile Include="source\Common\SimplexNoise.cpp" />
-    <ClCompile Include="source\Game\Terrain\PoissonDiscSampling.cpp" />
     <ClCompile Include="source\Game\Terrain\Terrain.cpp" />
     <ClCompile Include="source\Game\Terrain\TerrainMaterial.cpp" />
-    <ClCompile Include="source\Game\Terrain\Water.cpp" />
     <ClCompile Include="source\main.cpp" />
-    <ClCompile Include="source\PagedGeometry\BatchedGeometry.cpp" />
-    <ClCompile Include="source\PagedGeometry\BatchPage.cpp" />
-    <ClCompile Include="source\PagedGeometry\GrassLoader.cpp" />
-    <ClCompile Include="source\PagedGeometry\ImpostorPage.cpp" />
-    <ClCompile Include="source\PagedGeometry\PagedGeometry.cpp" />
-    <ClCompile Include="source\PagedGeometry\PropertyMaps.cpp" />
-    <ClCompile Include="source\PagedGeometry\StaticBillboardSet.cpp" />
-    <ClCompile Include="source\PagedGeometry\TreeLoader2D.cpp" />
-    <ClCompile Include="source\PagedGeometry\TreeLoader3D.cpp" />
-    <ClCompile Include="source\PagedGeometry\WindBatchedGeometry.cpp" />
-    <ClCompile Include="source\PagedGeometry\WindBatchPage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NavMeshBuilder.h" />
@@ -68,7 +54,6 @@
     <ClInclude Include="source\AI\Recast\Include\RecastAlloc.h" />
     <ClInclude Include="source\AI\Recast\Include\RecastAssert.h" />
     <ClInclude Include="source\Common\Poisson.h" />
-    <ClInclude Include="source\Engine\ShaderGenerator.h" />
     <ClInclude Include="source\Game\Camera.h" />
     <ClInclude Include="source\Engine\Event.h" />
     <ClInclude Include="source\Game\Game.h" />
@@ -77,26 +62,11 @@
     <ClInclude Include="source\Engine\InputManager.h" />
     <ClInclude Include="source\Game\PoissonMeshInstance.h" />
     <ClInclude Include="source\Game\Terrain\BiomeHandler.h" />
-    <ClInclude Include="source\Game\Terrain\ModelPlacer.h" />
     <ClInclude Include="source\Game\Terrain\HydraulicErosion.h" />
     <ClInclude Include="source\Game\Terrain\PlantPlacer.h" />
     <ClInclude Include="source\Common\SimplexNoise.h" />
-    <ClInclude Include="source\Game\Terrain\PoissonDiscSampling.h" />
     <ClInclude Include="source\Game\Terrain\Terrain.h" />
     <ClInclude Include="source\Game\Terrain\TerrainMaterial.h" />
-    <ClInclude Include="source\Game\Terrain\Water.h" />
-    <ClInclude Include="source\PagedGeometry\BatchedGeometry.h" />
-    <ClInclude Include="source\PagedGeometry\BatchPage.h" />
-    <ClInclude Include="source\PagedGeometry\GrassLoader.h" />
-    <ClInclude Include="source\PagedGeometry\ImpostorPage.h" />
-    <ClInclude Include="source\PagedGeometry\PagedGeometry.h" />
-    <ClInclude Include="source\PagedGeometry\PropertyMaps.h" />
-    <ClInclude Include="source\PagedGeometry\RandomTable.h" />
-    <ClInclude Include="source\PagedGeometry\StaticBillboardSet.h" />
-    <ClInclude Include="source\PagedGeometry\TreeLoader2D.h" />
-    <ClInclude Include="source\PagedGeometry\TreeLoader3D.h" />
-    <ClInclude Include="source\PagedGeometry\WindBatchedGeometry.h" />
-    <ClInclude Include="source\PagedGeometry\WindBatchPage.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

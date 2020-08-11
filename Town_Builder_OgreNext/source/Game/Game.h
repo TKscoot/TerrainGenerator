@@ -23,12 +23,9 @@
 
 // Game Logic
 #include "Engine/InputManager.h"
-#include "Engine/ShaderGenerator.h"
 #include "Camera.h"
 #include "Game/Terrain/Terrain.h"
-#include "Game/Terrain/ModelPlacer.h"
 #include "Game/Terrain/PlantPlacer.h"
-#include "Terrain/PoissonDiscSampling.h"
 #include "Engine/Event.h"
 #include "Common/Poisson.h"
 
@@ -54,26 +51,10 @@ public:
 		mCamera->InjectKeyDown(evt); return true; 
 	}
 	virtual bool keyReleased(		const KeyboardEvent& evt)	 { mListenerChain.keyReleased(evt); mCamera->InjectKeyUp(evt); return true; }
-	virtual bool touchMoved(		const TouchFingerEvent& evt) { return true; }
-	virtual bool touchPressed(		const TouchFingerEvent& evt) { return true; }
-	virtual bool touchReleased(		const TouchFingerEvent& evt) { return true; }
 	virtual bool mouseMoved(		const MouseMotionEvent& evt) { mListenerChain.mouseMoved(evt); mCamera->InjectMouseMove(evt); return true; }
 	virtual bool mouseWheelRolled(	const MouseWheelEvent& evt)  { mListenerChain.mouseWheelRolled(evt); return true; }
 	virtual bool mousePressed(		const MouseButtonEvent& evt) { mListenerChain.mousePressed(evt); return true; }
 	virtual bool mouseReleased(		const MouseButtonEvent& evt) { mListenerChain.mouseReleased(evt); return true; }
-	virtual bool textInput(			const TextInputEvent& evt)   { return true; }
-
-	// Window callbacks
-	bool windowClosing(Ogre::RenderWindow* rw) 
-	{ 
-		exit(0);
-		return true; 
-	}
-
-	void windowClosed(Ogre::RenderWindow* rw)
-	{
-		exit(0);
-	}
 
 	void Setup();
 	bool Update(const FrameEvent &evt);
@@ -100,7 +81,6 @@ private:
 	CCamera*      mCamera;
 
 	CTerrain*     mTerrain;
-	CModelPlacer* mModelPlacer;
 	CPlantPlacer* mPlantPlacer;
 
 	// Input Listeners

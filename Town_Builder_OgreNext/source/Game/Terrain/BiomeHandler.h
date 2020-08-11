@@ -7,7 +7,6 @@
 #include <OgreTexture.h>
 
 #include "Common/SimplexNoise.h"
-#include "ETM/ETSplattingManager.h"
 
 #include "Game/PoissonMeshInstance.h"
 
@@ -46,6 +45,7 @@ void write_enum_value(std::ostream& out, EnumType t,
         return out; \
     }
 
+// using this macro to print enum names in stdout
 DEFINE_ENUM(Biomes,
 	0,
 	OCEAN,
@@ -62,6 +62,7 @@ DEFINE_ENUM(Biomes,
 	TROPICAL_RAIN_FOREST,
 	BIOME_LAST
 )
+
 
 class CBiomeHandler
 {
@@ -82,10 +83,6 @@ public:
 		float				  maxSize = 8.0f;
 	};
 
-	//std::array<BiomeVegetationDescription, static_cast<int>(Biomes::BIOME_LAST)> &GetBiomeVegetationDescriptions() 
-	//{ 
-	//	return mBiomeVegetationDescriptions; 
-	//}
 	std::array<BiomeVegetationDescription, static_cast<int>(Biomes::BIOME_LAST)> mBiomeVegetationDescriptions;
 
 private:
@@ -95,12 +92,9 @@ private:
 
 	// Variables
 	Terrain* mTerrain = nullptr;
-	//ET::SplattingManager* mSplatMgr = nullptr;
-
 
 	std::vector<float> mNormalisedHeightMap;
 	std::vector<float> mMoistureMap;
-
 
 	// moisture map params
 	Real	mCycle = 1024;

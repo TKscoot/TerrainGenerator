@@ -21,15 +21,14 @@
 #include "Common/Helpers.h"
 #include "Engine/InputManager.h"
 #include "Engine/Event.h"
-#include "AI/Recast/Helpers/RecastInputGeom.h"
 #include "HydraulicErosion.h"
 #include "PlantPlacer.h"
 #include "BiomeHandler.h"
 
 #define TERRAIN_FILE_PREFIX String("testTerrain")
 #define TERRAIN_FILE_SUFFIX String("dat")
-#define TERRAIN_WORLD_SIZE 12000.0f
-#define TERRAIN_SIZE 513
+#define TERRAIN_WORLD_SIZE 12000.0f // how bi the terrain is in WorldSpace
+#define TERRAIN_SIZE 513 // terrain size must be x^2+1
 
 using namespace Ogre;
 
@@ -41,14 +40,11 @@ public:
 
 	void Initialize(PSSMShadowCameraSetup* pssmSetup);
 	bool Update(const FrameEvent& evt);
-	void CreateTerrain();
-	
+
 	void UpdateSeed();
+	void CreateTerrain();
 
 	void Erode(int iterations);
-	void GenerateFalloff();
-
-	void FlattenTerrainUnderObject(SceneNode* sn);
 
 	// Getter & Setter
 	TerrainGroup* getTerrainGroup() 
@@ -61,15 +57,15 @@ public:
 		return mTerrain->getGlobalColourMap(); 
 	}
 
-	InputGeom* GetInputGeom() { return mInputGeom; }
-
 private:
 	// Methods
+
 	void ConfigureTerrainDefaults();
 
+	// Defines initial Terrain
 	void DefineTerrain(long x, long y);
+	// Updates heightdata of already generated terrain
 	void UpdateTerrainHeight(long x, long y);
-	void GetTerrainImage(bool flipX, bool flipY, Image& img);
 	void InitBlendMaps(Terrain* terrain);
 
 	// structs
@@ -88,7 +84,6 @@ private:
 	TerrainGroup*		  mTerrainGroup;
 	Terrain*			  mTerrain;
 	TerrainMaterial*	  mTerrainMaterial;
-	InputGeom*			  mInputGeom;
 	CPlantPlacer*         mPlantPlacer;
 	CBiomeHandler*        mBiomeHandler;
 
@@ -110,4 +105,5 @@ private:
 	int	mErosionIterations = 10;
 
 	std::string	mSeed = "";
+
 };

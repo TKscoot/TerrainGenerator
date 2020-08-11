@@ -14,6 +14,7 @@ public:
 	void initialise(Ogre::RenderWindow *renderWindow);
 	void destroy();
 	void frameRendered(	  const Ogre::FrameEvent& evt) {}
+
 	bool keyPressed(	  const KeyboardEvent& evt) 
 	{ 
 		mCam->InjectKeyDown(evt);
@@ -65,7 +66,7 @@ public:
 private:
 	InputManager(void);
 	InputManager(const InputManager&) {}
-	//InputManager & operator = (const InputManager&);
+
 	CCamera* mCam;
 
 	static InputManager *mInputManager;

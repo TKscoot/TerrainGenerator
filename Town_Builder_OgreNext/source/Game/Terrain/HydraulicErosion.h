@@ -58,7 +58,7 @@ private:
 	float mGravity			   = 4.0f;
 	float mEvaporationSpeed	   = 0.01f;
 
-	// current vars (members, so i can use them with ImGui)
+	// current vars (members so i can use them with ImGui)
 	float mSpeed    = 1.0f;
 	float mWater    = 1.0f;
 	float mSediment = 0.0f;

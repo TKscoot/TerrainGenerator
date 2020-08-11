@@ -97,7 +97,6 @@ void CHydraulicErosion::Calculate(std::vector<float>& map)
 			float heightSE = map[nodeIndexNW + mSize + 1];
 
 			// Calculate droplet's direction of flow with bilinear interpolation of height difference along the edges
-
 			gradient = Vector2(
 				(heightNE - heightNW) * (1 - y) + (heightSE - heightSW) * y,
 				(heightSW - heightNW) * (1 - x) + (heightSE - heightNE) * x);

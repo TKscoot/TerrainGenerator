@@ -1,18 +1,17 @@
 #include "TerrainMaterial.h"
 
-TerrainMaterial::TerrainMaterial(Ogre::String materialName, bool addNormalmap, bool cloneMaterial)
-	: mMaterialName(materialName), mAddNormalMap(addNormalmap), mCloneMaterial(cloneMaterial)
+TerrainMaterial::TerrainMaterial(Ogre::String materialName)
+	: mMaterialName(materialName)
 {
 	mProfiles.push_back(OGRE_NEW SM2ProfileA(this, "OgreMaterial", "Profile for rendering Ogre standard material"));
 	setActiveProfile("OgreMaterial");
 
-
+	// Create coverage map textures
 	for (int i = 0; i < 3; i++)
 	{
 		StringStream ss;
 		ss << "CovMap";
 		ss << i;
-
 
 		TextureManager::getSingleton().createManual(
 			ss.str(), // name
@@ -21,8 +20,7 @@ TerrainMaterial::TerrainMaterial(Ogre::String materialName, bool addNormalmap, b
 			512, 512,         // width & height
 			0,                // number of mipmaps
 			PF_BYTE_RGBA,     // pixel format
-			TU_DYNAMIC);      // usage; should be TU_DYNAMIC_WRITE_ONLY_DISCARDABLE for
-							  // textures updated very often (e.g. each frame);
+			TU_DYNAMIC);      // usage flags
 	}
 }
 
@@ -38,7 +36,6 @@ TerrainMaterial::SM2ProfileA::SM2ProfileA(TerrainMaterialGenerator* parent, cons
 	: SM2Profile(parent, name, desc)
 {
 	HighLevelGpuProgramManager& hmgr = HighLevelGpuProgramManager::getSingleton();
-
 }
 
 TerrainMaterial::SM2ProfileA::~SM2ProfileA()
@@ -58,6 +55,7 @@ Ogre::MaterialPtr TerrainMaterial::SM2ProfileA::generate(const Ogre::Terrain * t
 		
 		Pass* p = mat->getTechnique(0)->getPass(0);
 
+		// Set texture samplers for shaders
 		for (int i = 0; i < 3; i++)
 		{
 			StringStream ss;
@@ -67,5 +65,46 @@ Ogre::MaterialPtr TerrainMaterial::SM2ProfileA::generate(const Ogre::Terrain * t
 			p->getTextureUnitState(i)->setTextureName(ss.str());
 		}
 
+		SamplerPtr mapSampler = TextureManager::getSingleton().createSampler();
+		mapSampler->setAddressingMode(TAM_CLAMP);
+
+		TextureUnitState* tu = p->getTextureUnitStates()[10];
+		tu->setTexture(terrain->getTerrainNormalMap());
+		tu->setSampler(mapSampler);
+
+		// Set shader params
+		p->getFragmentProgram()->createParameters()->setNamedAutoConstant(
+			"lightDiffuse", 
+			Ogre::GpuProgramParameters::AutoConstantType::ACT_LIGHT_DIFFUSE_COLOUR, 0);
+
+		p->getFragmentProgram()->createParameters()->setNamedAutoConstant(
+			"lightSpecular", 
+			Ogre::GpuProgramParameters::AutoConstantType::ACT_LIGHT_SPECULAR_COLOUR, 0);
+
+		p->getFragmentProgram()->createParameters()->setNamedAutoConstant(
+			"lightPosition", 
+			Ogre::GpuProgramParameters::AutoConstantType::ACT_LIGHT_POSITION_OBJECT_SPACE, 0);
+
+		p->getFragmentProgram()->createParameters()->setNamedAutoConstant(
+			"eyePosition", 
+			Ogre::GpuProgramParameters::AutoConstantType::ACT_CAMERA_POSITION_OBJECT_SPACE);
+
+		p->getFragmentProgram()->createParameters()->setNamedAutoConstant(
+			"attenuation", 
+			Ogre::GpuProgramParameters::AutoConstantType::ACT_LIGHT_ATTENUATION, 0);
+
+		p->getFragmentProgram()->createParameters()->setNamedAutoConstant(
+			"ambient", 
+			Ogre::GpuProgramParameters::AutoConstantType::ACT_AMBIENT_LIGHT_COLOUR, 0);
+
 	return mat;
 }
+
+void TerrainMaterial::SM2ProfileA::requestOptions(Ogre::Terrain* terrain)
+{
+	terrain->_setMorphRequired(true);
+	terrain->_setNormalMapRequired(true);
+	terrain->_setLightMapRequired(mLightmapEnabled, true);
+	terrain->_setCompositeMapRequired(mCompositeMapEnabled);
+}
+

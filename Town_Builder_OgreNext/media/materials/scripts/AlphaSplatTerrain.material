@@ -1,106 +1,6 @@
-//material AlphaSplatTerrain
-//{
-//    technique Default
-//    {
-//        pass Main
-//        {
-//            vertex_program_ref AlphaSplatTerrain/VP
-//            {
-//                param_named_auto worldViewProj      worldviewproj_matrix
-//
-//                param_named_auto LightDiffuse[0] light_diffuse_colour 0
-//                param_named_auto LightDiffuse[1] light_diffuse_colour 1
-//                
-//                param_named_auto LightPosition[0] light_position_object_space 0
-//                param_named_auto LightPosition[1] light_position_object_space 1
-//                
-//                param_named_auto LightAttenuation[0] light_attenuation 0
-//                param_named_auto LightAttenuation[1] light_attenuation 1
-//                
-//                param_named_auto lightAmbient ambient_light_colour
-//                param_named materialDiffuse float4 1.0 1.0 1.0 1.0
-//                param_named materialAmbient float4 0.6 0.6 0.6 1.0
-//                
-//                param_named pageSize float 1024
-//                param_named_auto worldMat world_matrix
-//                param_named_auto fogSettings fog_params
-//                param_named textureTileSize float 10
-//                param_named alpha0TextureCoordAdjust float4 0 1 0 1
-//                param_named alpha1TextureCoordAdjust float4 0 1 0 1
-//            }
-//
-//            fragment_program_ref AlphaSplatTerrain/FP
-//            {
-//                param_named alpha0Mask float4 1 1 1 0
-//                param_named alpha1Mask float4 0 0 0 0
-//            }
-//            texture_unit
-//            {
-//                texture alphamap1.png
-//                tex_address_mode clamp
-//            }
-//            texture_unit
-//            {
-//                texture black.png
-//                tex_address_mode clamp
-//            }
-//            texture_unit
-//            {
-//                texture gras.jpg
-//                filtering anisotropic
-//            }
-//            texture_unit
-//            {
-//                texture moos2.jpg
-//                filtering anisotropic
-//            }
-//            texture_unit
-//            {    
-//                texture schlamm_getrocknet1.jpg
-//                filtering anisotropic
-//            }
-//            texture_unit
-//            {    
-//                texture gras.jpg
-//                tex_address_mode wrap
-//            }
-//            texture_unit
-//            {    
-//                texture gras.jpg
-//                tex_address_mode wrap
-//            }
-//            texture_unit
-//            {    
-//                texture moos2.jpg
-//                tex_address_mode wrap
-//            }
-//            
-//            texture_unit
-//            {    
-//                texture schlamm_getrocknet1.jpg
-//                tex_address_mode wrap
-//            }
-//            
-//            texture_unit
-//            {    
-//                texture gras.jpg
-//                tex_address_mode wrap
-//            }
-//            
-//            texture_unit
-//            {
-//                texture Detail3.jpg
-//                tex_address_mode wrap
-//            }
-//        }
-//    }
-//}
-
 vertex_program customTerrainVert glsl
 {
   source Terrain.vert
-
-
 }
 
 fragment_program customTerrainFrag glsl
@@ -133,6 +33,7 @@ material CustomTerrain
     {
 	  vertex_program_ref customTerrainVert
 	  {  
+		param_named_auto world world_matrix
 		param_named_auto worldViewProj worldviewproj_matrix
 	  }  
 	
